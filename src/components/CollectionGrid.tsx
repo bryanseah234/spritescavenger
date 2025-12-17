@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Image from "next/image";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";

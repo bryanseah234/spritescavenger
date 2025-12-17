@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Play, Cpu } from "lucide-react";
 
 interface ExpeditionConsoleProps {
@@ -10,16 +9,9 @@ interface ExpeditionConsoleProps {
 }
 
 export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, onStart, onOpenShop }: ExpeditionConsoleProps) {
-    const [progress, setProgress] = useState(0);
-
-    useEffect(() => {
-        if (isActive) {
-            const percentage = ((totalDuration - timeLeft) / totalDuration) * 100;
-            setProgress(percentage);
-        } else {
-            setProgress(0);
-        }
-    }, [isActive, timeLeft, totalDuration]);
+    const progress = isActive
+        ? ((totalDuration - timeLeft) / totalDuration) * 100
+        : 0;
 
     return (
         <div className="w-full max-w-md mx-auto p-4">

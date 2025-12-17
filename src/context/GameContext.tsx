@@ -32,7 +32,7 @@ interface GameContextType extends GameState {
   importSave: (base64: string) => boolean;
   isLoading: boolean;
   pendingLoot: string[] | null;
-  setPendingLoot: (items: string[] | null) => void;
+  setPendingLoot: React.Dispatch<React.SetStateAction<string[] | null>>;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -68,6 +68,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setInventory(parsed.inventory || []);
         setWallet(parsed.wallet || 0);
         setBits(parsed.bits || 0);
@@ -81,7 +82,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save to LocalStorage

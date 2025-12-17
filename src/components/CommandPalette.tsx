@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, Hash, ArrowRight, Zap, Database, Hammer, Cpu, Terminal } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, Hash, ArrowRight, Database, Hammer, Cpu, Terminal } from "lucide-react";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 import { getRarity } from "@/utils/rarity";
@@ -8,6 +8,17 @@ interface CommandPaletteProps {
     isOpen: boolean;
     onClose: () => void;
     onNavigate: (tab: string) => void;
+}
+
+// Define Item Interface
+interface PaletteItem {
+    id: string;
+    label: string;
+    type: 'NAV' | 'ITEM';
+    value: string;
+    icon: React.ElementType;
+    isOwned?: boolean;
+    rarity?: { name: string; hex: string; value: number };
 }
 
 export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandPaletteProps) {
@@ -19,13 +30,53 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
     // Auto-focus input when opened
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setQuery("");
             setSelectedIndex(0);
             setTimeout(() => inputRef.current?.focus(), 50);
         }
     }, [isOpen]);
 
-    // Handle Closing
+    // --- Search Logic ---
+    // 1. Navigation Commands
+    const navCommands: PaletteItem[] = [
+        { id: 'nav-term', label: 'Go to Terminal', type: 'NAV', value: 'terminal', icon: Terminal },
+        { id: 'nav-lab', label: 'Go to Lab', type: 'NAV', value: 'lab', icon: Cpu },
+        { id: 'nav-forge', label: 'Go to Forge', type: 'NAV', value: 'forge', icon: Hammer },
+        { id: 'nav-db', label: 'Go to Database', type: 'NAV', value: 'database', icon: Database },
+    ];
+
+    // 2. Item Search
+    // Flatten master collection
+    const allItems: PaletteItem[] = Object.entries(masterCollection).flatMap(([cat, slugs]) =>
+        (slugs as string[]).map(slug => ({
+            id: slug,
+            label: slug.split('-').pop() || slug,
+            type: 'ITEM',
+            value: slug,
+            cat,
+            icon: Hash,
+            isOwned: inventory.includes(slug),
+            rarity: getRarity(slug)
+        }))
+    );
+
+    // Filter
+    const results = [
+        ...navCommands.filter(c => c.label.toLowerCase().includes(query.toLowerCase())),
+        ...allItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase()) || i.value.toLowerCase().includes(query.toLowerCase()))
+    ].slice(0, 10); // Limit to 10
+
+    const handleSelect = useCallback((item: PaletteItem) => {
+        if (item.type === 'NAV') {
+            onNavigate(item.value);
+        } else if (item.type === 'ITEM') {
+            onNavigate('database');
+        }
+        onClose();
+    }, [onNavigate, onClose]);
+
+    // Handle Closing and Navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isOpen) return;
@@ -51,48 +102,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [isOpen]); // Dependency on results is tricky here, simplification: ignore strict result dep for index cap for now or move logic
-
-    // --- Search Logic ---
-    // 1. Navigation Commands
-    const navCommands = [
-        { id: 'nav-term', label: 'Go to Terminal', type: 'NAV', value: 'terminal', icon: Terminal },
-        { id: 'nav-lab', label: 'Go to Lab', type: 'NAV', value: 'lab', icon: Cpu },
-        { id: 'nav-forge', label: 'Go to Forge', type: 'NAV', value: 'forge', icon: Hammer },
-        { id: 'nav-db', label: 'Go to Database', type: 'NAV', value: 'database', icon: Database },
-    ];
-
-    // 2. Item Search
-    // Flatten master collection
-    const allItems = Object.entries(masterCollection).flatMap(([cat, slugs]) =>
-        slugs.map(slug => ({
-            id: slug,
-            label: slug.split('-').pop() || slug,
-            type: 'ITEM',
-            value: slug,
-            cat,
-            icon: Hash,
-            isOwned: inventory.includes(slug),
-            rarity: getRarity(slug)
-        }))
-    );
-
-    // Filter
-    const results = [
-        ...navCommands.filter(c => c.label.toLowerCase().includes(query.toLowerCase())),
-        ...allItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase()) || i.value.toLowerCase().includes(query.toLowerCase()))
-    ].slice(0, 10); // Limit to 10
-
-    const handleSelect = (item: any) => {
-        if (item.type === 'NAV') {
-            onNavigate(item.value);
-        } else if (item.type === 'ITEM') {
-            // Ideally jump to database and highlight? 
-            // For now, just go to database
-            onNavigate('database');
-        }
-        onClose();
-    };
+    }, [isOpen, results, selectedIndex, onClose, onNavigate, handleSelect]); // We include dependencies here
 
     if (!isOpen) return null;
 

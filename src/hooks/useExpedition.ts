@@ -80,6 +80,7 @@ export function useExpedition() {
     // Reset timeLeft when expedition stops
     useEffect(() => {
         if (!expeditionStartTime) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setTimeLeft(0);
         }
     }, [expeditionStartTime]);
@@ -103,7 +104,7 @@ export function useExpedition() {
         }, 200);
 
         return () => clearInterval(interval);
-    }, [expeditionStartTime, duration, generateLoot]);
+    }, [expeditionStartTime, duration, generateLoot, setLoot]);
 
     const isActive = expeditionStartTime !== null && timeLeft > 0;
     const isFinished = expeditionStartTime !== null && timeLeft === 0;

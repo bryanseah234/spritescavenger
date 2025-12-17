@@ -3,7 +3,9 @@ import { BIOMES } from "@/data/biomes";
 import { Lock, Map as MapIcon, Utensils, Trees, Hammer, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 
-const ICONS: Record<string, any> = {
+import React from "react";
+
+const ICONS: Record<string, React.ElementType> = {
     Map: MapIcon,
     Utensils: Utensils,
     Trees: Trees,

@@ -4,7 +4,7 @@ import { Flame, ArrowRight } from "lucide-react";
 import { getRarity } from "@/utils/rarity";
 
 export default function Forge() {
-    const { inventory, addToInventory, burnItems } = useGame(); // Removed unused bits/addBits for now if not used
+    const { inventory, burnItems } = useGame(); // Removed unused bits/addBits for now if not used
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
     // Simplification: Auto-select 10 duplicates for user? Or manual selection?

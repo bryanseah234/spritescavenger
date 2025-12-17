@@ -1,6 +1,7 @@
-import { Trophy, Coins, Zap, Settings } from "lucide-react";
+import { Trophy, Coins, Settings } from "lucide-react";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
+import Image from "next/image";
 
 interface HeaderProps {
     onSettingsClick: (tab?: string) => void;
@@ -13,7 +14,11 @@ export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
     const totalItems = Object.values(masterCollection).flat().length;
     const uniqueItems = new Set(inventory).size;
 
-    const progress = (xp / nextLevelXp) * 100;
+    // XP Progress Calculation
+    const currentLevelBase = 100 * Math.pow(level - 1, 2);
+    const nextLevelBase = 100 * Math.pow(level, 2);
+    const progress = Math.min(100, Math.max(0, ((xp - currentLevelBase) / (nextLevelBase - currentLevelBase)) * 100));
+    const nextLevelXp = nextLevelBase; // For display
 
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-50">
