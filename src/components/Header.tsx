@@ -3,10 +3,11 @@ import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 
 interface HeaderProps {
-    onSettingsClick: () => void;
+    onSettingsClick: (tab?: string) => void;
+    activeTab: string;
 }
 
-export default function Header({ onSettingsClick }: HeaderProps) {
+export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
     const { inventory, bits, xp, level } = useGame();
 
     const totalItems = Object.values(masterCollection).flat().length;
@@ -22,25 +23,41 @@ export default function Header({ onSettingsClick }: HeaderProps) {
 
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-50">
-            <div className="flex items-center gap-2">
-                <div className="relative w-10 h-10 bg-indigo-500 rounded flex items-center justify-center">
-                    <Zap className="text-white w-5 h-5 relative z-10" />
-                    <div className="absolute inset-x-0 bottom-0 bg-black/20 h-full">
-                        <div className="bg-indigo-300 w-full absolute bottom-0 left-0 transition-all" style={{ height: `${progressPercent}%`, opacity: 0.3 }} />
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 shrink-0">
+                    <div className="relative w-10 h-10 bg-indigo-500 rounded flex items-center justify-center">
+                        <Zap className="text-white w-5 h-5 relative z-10" />
+                        <div className="absolute inset-x-0 bottom-0 bg-black/20 h-full">
+                            <div className="bg-indigo-300 w-full absolute bottom-0 left-0 transition-all" style={{ height: `${progressPercent}%`, opacity: 0.3 }} />
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <h1 className="text-slate-100 font-bold text-sm tracking-widest uppercase">Sprite Scavenger</h1>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <span className="text-indigo-400 font-bold">LVL {level}</span>
-                        <span className="w-1 h-1 bg-slate-600 rounded-full" />
-                        <span className="font-mono">{Math.floor(xp)} XP</span>
-                    </div>
-                </div>
+
+                {/* Desktop/Tablet Nav */}
+                <nav className="hidden md:flex items-center gap-1">
+                    <button
+                        onClick={() => onSettingsClick('explore')}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'explore' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                    >
+                        EXPLORE
+                    </button>
+                    <button
+                        onClick={() => onSettingsClick('collection')}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'collection' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                    >
+                        COLLECTION
+                    </button>
+                    <button
+                        onClick={() => onSettingsClick('forge')}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'forge' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                    >
+                        FORGE
+                    </button>
+                </nav>
             </div>
 
             <div className="flex items-center gap-4">
-                <div className="flex flex-col items-end">
+                <div className="hidden sm:flex flex-col items-end">
                     <div className="flex items-center gap-1 text-emerald-400">
                         <Trophy className="w-3 h-3" />
                         <span className="font-mono text-sm leading-none">{uniqueItems} / {totalItems}</span>
@@ -57,7 +74,7 @@ export default function Header({ onSettingsClick }: HeaderProps) {
                 </div>
 
                 <button
-                    onClick={onSettingsClick}
+                    onClick={() => onSettingsClick('settings')}
                     className="p-2 bg-slate-800 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
                 >
                     <Settings className="w-4 h-4" />

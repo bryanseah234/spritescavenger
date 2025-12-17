@@ -31,6 +31,8 @@ interface GameContextType extends GameState {
   exportSave: () => string;
   importSave: (base64: string) => boolean;
   isLoading: boolean;
+  pendingLoot: string[] | null;
+  setPendingLoot: (items: string[] | null) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -53,6 +55,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [expeditionStartTime, setExpeditionStartTime] = useState<number | null>(
     null
   );
+  const [pendingLoot, setPendingLoot] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Derived Level: Level = floor(sqrt(xp / 100)) + 1
@@ -224,6 +227,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         exportSave,
         importSave,
         isLoading,
+        pendingLoot,
+        setPendingLoot,
       }}
     >
       {children}

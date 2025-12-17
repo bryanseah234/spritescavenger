@@ -19,7 +19,9 @@ export function useExpedition() {
         addXp,
         inventory,
         upgrades,
-        activeBiome
+        activeBiome,
+        pendingLoot: loot, // Alias to keep existing code working
+        setPendingLoot: setLoot // Alias
     } = useGame();
 
     // Calculate duration based on Overclock speed
@@ -33,7 +35,7 @@ export function useExpedition() {
         return Math.max(0, duration - elapsedSeconds);
     });
 
-    const [loot, setLoot] = useState<string[] | null>(null);
+    // Local loot state removed in favor of Context
 
 
     const generateLoot = useCallback(() => {
