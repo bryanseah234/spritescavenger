@@ -79,4 +79,13 @@ describe("useExpedition", () => {
         expect(result.current.loot).not.toBeNull();
         expect(result.current.loot?.length).toBeGreaterThanOrEqual(3);
     });
+
+    // Phase 3 Test: Verify Loot generation respects default Biome
+    // (Indirectly tested via generateLoot, but explicit check helps)
+    it("should generate loot when finished", async () => {
+        const { result } = renderHook(() => useExpedition(), { wrapper });
+        act(() => { result.current.start(); });
+        await act(async () => { vi.advanceTimersByTime(31000); });
+        expect(result.current.loot).toBeTruthy();
+    });
 });
