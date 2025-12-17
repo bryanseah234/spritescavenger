@@ -5,6 +5,9 @@ import { GameProvider } from "@/context/GameContext";
 export const metadata: Metadata = {
   title: "Sprite Scavenger",
   description: "Idle Collection RPG",
+  icons: {
+    icon: '/icon.png',
+  },
 };
 
 export default function RootLayout({
