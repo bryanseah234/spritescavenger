@@ -30,6 +30,8 @@ interface GameContextType extends GameState {
   burnItems: (slugs: string[]) => void; // Core for Forge
   startExpedition: () => void;
   endExpedition: () => void;
+  exportSave: () => string;
+  importSave: (base64: string) => boolean;
   isLoading: boolean;
 }
 
