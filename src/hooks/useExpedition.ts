@@ -75,12 +75,17 @@ export function useExpedition() {
         return newLoot;
     }, [upgrades.multithread, upgrades.luck, activeBiome]);
 
+    // Reset timeLeft when expedition stops
     useEffect(() => {
         if (!expeditionStartTime) {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            if (timeLeft !== 0) setTimeLeft(0);
-            return;
+            setTimeLeft(0);
         }
+    }, [expeditionStartTime]);
+
+    // Timer Logic
+    useEffect(() => {
+        if (!expeditionStartTime) return;
+
 
         const interval = setInterval(() => {
             const now = Date.now();
@@ -96,7 +101,7 @@ export function useExpedition() {
         }, 200);
 
         return () => clearInterval(interval);
-    }, [expeditionStartTime, duration, generateLoot, timeLeft]);
+    }, [expeditionStartTime, duration, generateLoot]);
 
     const isActive = expeditionStartTime !== null && timeLeft > 0;
     const isFinished = expeditionStartTime !== null && timeLeft === 0;
