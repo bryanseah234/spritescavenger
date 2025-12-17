@@ -7,11 +7,13 @@ import { useGame } from "@/context/GameContext";
 import ExpeditionView from "@/views/ExpeditionView";
 import CollectionView from "@/views/CollectionView";
 import ForgeView from "@/views/ForgeView";
+import LabView from "@/views/LabView";
+import { Terminal, Cpu, Hammer, Database } from "lucide-react";
 
 export default function Home() {
   const { isLoading } = useGame();
 
-  const [activeTab, setActiveTab] = useState('explore');
+  const [activeTab, setActiveTab] = useState('terminal');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -40,32 +42,43 @@ export default function Home() {
       <Header onSettingsClick={handleNav} activeTab={activeTab} />
 
       <div className="w-full">
-        {activeTab === 'explore' && <ExpeditionView />}
-        {activeTab === 'collection' && <CollectionView />}
+        {activeTab === 'terminal' && <ExpeditionView />}
+        {activeTab === 'lab' && <LabView />}
         {activeTab === 'forge' && <ForgeView />}
+        {activeTab === 'database' && <CollectionView />}
       </div>
 
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
-      {/* Mobile Nav Bar - Fixed Bottom (Optional enhancement for Mobile First) */}
+      {/* Mobile Nav Bar - Fixed Bottom */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 flex justify-around z-50 pb-safe">
         <button
-          onClick={() => setActiveTab('explore')}
-          className={`flex flex-col items-center p-2 rounded ${activeTab === 'explore' ? 'text-indigo-400' : 'text-slate-500'}`}
+          onClick={() => setActiveTab('terminal')}
+          className={`flex flex-col items-center p-2 rounded w-16 ${activeTab === 'terminal' ? 'text-indigo-400' : 'text-slate-500'}`}
         >
-          <span className="text-[10px] font-bold">EXPLORE</span>
+          <Terminal className="w-5 h-5 mb-1" />
+          <span className="text-[9px] font-bold">TERM</span>
         </button>
         <button
-          onClick={() => setActiveTab('collection')}
-          className={`flex flex-col items-center p-2 rounded ${activeTab === 'collection' ? 'text-indigo-400' : 'text-slate-500'}`}
+          onClick={() => setActiveTab('lab')}
+          className={`flex flex-col items-center p-2 rounded w-16 ${activeTab === 'lab' ? 'text-indigo-400' : 'text-slate-500'}`}
         >
-          <span className="text-[10px] font-bold">COLLECTION</span>
+          <Cpu className="w-5 h-5 mb-1" />
+          <span className="text-[9px] font-bold">LAB</span>
         </button>
         <button
           onClick={() => setActiveTab('forge')}
-          className={`flex flex-col items-center p-2 rounded ${activeTab === 'forge' ? 'text-indigo-400' : 'text-slate-500'}`}
+          className={`flex flex-col items-center p-2 rounded w-16 ${activeTab === 'forge' ? 'text-indigo-400' : 'text-slate-500'}`}
         >
-          <span className="text-[10px] font-bold">FORGE</span>
+          <Hammer className="w-5 h-5 mb-1" />
+          <span className="text-[9px] font-bold">FORGE</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('database')}
+          className={`flex flex-col items-center p-2 rounded w-16 ${activeTab === 'database' ? 'text-indigo-400' : 'text-slate-500'}`}
+        >
+          <Database className="w-5 h-5 mb-1" />
+          <span className="text-[9px] font-bold">DB</span>
         </button>
       </div>
     </main>

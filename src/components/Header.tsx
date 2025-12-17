@@ -36,22 +36,28 @@ export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
                 {/* Desktop/Tablet Nav */}
                 <nav className="hidden md:flex items-center gap-1">
                     <button
-                        onClick={() => onSettingsClick('explore')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'explore' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                        onClick={() => onSettingsClick('terminal')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'terminal' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
                     >
-                        EXPLORE
+                        TERMINAL
                     </button>
                     <button
-                        onClick={() => onSettingsClick('collection')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'collection' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                        onClick={() => onSettingsClick('lab')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'lab' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
                     >
-                        COLLECTION
+                        LAB
                     </button>
                     <button
                         onClick={() => onSettingsClick('forge')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${activeTab === 'forge' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'forge' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
                     >
                         FORGE
+                    </button>
+                    <button
+                        onClick={() => onSettingsClick('database')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'database' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
+                    >
+                        DATABASE
                     </button>
                 </nav>
             </div>
