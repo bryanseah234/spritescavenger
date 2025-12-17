@@ -8,6 +8,7 @@ import ExpeditionView from "@/views/ExpeditionView";
 import CollectionView from "@/views/CollectionView";
 import ForgeView from "@/views/ForgeView";
 import LabView from "@/views/LabView";
+import CommandPalette from "@/components/CommandPalette";
 import { Terminal, Cpu, Hammer, Database } from "lucide-react";
 
 export default function Home() {
@@ -15,11 +16,41 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState('terminal');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Toggle Command Palette: Ctrl+K or Cmd+K
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandOpen(prev => !prev);
+      }
+
+      // Close on Escape
+      if (e.key === 'Escape') {
+        if (commandOpen) setCommandOpen(false);
+        if (settingsOpen) setSettingsOpen(false);
+      }
+
+      // Ignore other shortcuts if inputs or modals are open
+      if (commandOpen || settingsOpen) return;
+
+      // Tab Switching
+      if (e.key === '1') setActiveTab('terminal');
+      if (e.key === '2') setActiveTab('lab');
+      if (e.key === '3') setActiveTab('forge');
+      if (e.key === '4') setActiveTab('database');
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [commandOpen, settingsOpen]);
 
   const handleNav = (tab?: string) => {
     if (tab === 'settings') {
@@ -49,6 +80,13 @@ export default function Home() {
       </div>
 
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <CommandPalette
+        isOpen={commandOpen}
+        onClose={() => setCommandOpen(false)}
+        onNavigate={(tab) => {
+          setActiveTab(tab);
+        }}
+      />
 
       {/* Mobile Nav Bar - Fixed Bottom */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 flex justify-around z-50 pb-safe">

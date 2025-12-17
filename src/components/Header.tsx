@@ -86,12 +86,22 @@ export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
                     <span className="text-[10px] text-slate-500 uppercase tracking-wider">Bits</span>
                 </div>
 
-                <button
-                    onClick={() => onSettingsClick('settings')}
-                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded text-slate-400 hover:text-white transition-colors"
-                >
-                    <Settings className="w-4 h-4" />
-                </button>
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {/* Trigger palette? We need prop for this. Shortcuts work for now. */ }}
+                        className="hidden md:flex items-center gap-2 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-500 hover:text-slate-300 transition-colors pointer-events-none"
+                    >
+                        <span className="text-[10px] font-mono">CMD+K</span>
+                    </button>
+                    <button
+                        onClick={() => onSettingsClick('settings')}
+                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                        title="Settings"
+                    >
+                        <Settings className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
         </header>
     );
