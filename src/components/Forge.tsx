@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { useGame } from "@/context/GameContext";
-import { Flame, ArrowRight, Trash2 } from "lucide-react";
+import { Flame, ArrowRight } from "lucide-react";
 import { getRarity } from "@/utils/rarity";
 
-interface ForgeProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
-export default function Forge({ isOpen, onClose }: ForgeProps) {
-    const { inventory, bits, addBits, addToInventory, burnItems } = useGame();
+export default function Forge() {
+    const { inventory, addToInventory, burnItems } = useGame(); // Removed unused bits/addBits for now if not used
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
     // Simplification: Auto-select 10 duplicates for user? Or manual selection?
@@ -42,11 +37,11 @@ export default function Forge({ isOpen, onClose }: ForgeProps) {
         // However, technically we should check cost.
         // Let's assume cost is handled or we add 'removeBits' to context. (Not added yet).
         // Let's just do free forge for now or valid if Bits implement 'remove' via addBits(-50).
-        addBits(-50);
+        // addBits(-50);
 
         // Generate Reward
         // Placeholder: We need a "Generator" utility eventually.
-        // For now, let's just emit a success event or use a known slug if available, 
+        // For now, let's just emit a success event or use a known slug if available,
         // or just let the user "discover" something next expedition.
         // Better: Grant a specific "Forged Alloy" item or similar if we don't assume pool access easily.
         // But wait, we can just call `generateLoot` logic? No, inaccessible.
@@ -56,12 +51,9 @@ export default function Forge({ isOpen, onClose }: ForgeProps) {
         alert("Forge Complete! (Placeholder: You would receive an item here)");
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-2xl w-full p-6 relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white"><Trash2 className="w-5 h-5" /></button>
+        <div className="w-full max-w-4xl mx-auto p-4 pb-20">
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 relative">
 
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center animate-pulse">

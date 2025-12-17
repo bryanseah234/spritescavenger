@@ -15,18 +15,9 @@ export default function ForgeView() {
     // OR acting as a trigger.
     // Better: Refactor Forge to be a standard component, or create a 'ForgeScreen'.
 
-    // For this step, I will re-use the existing Forge modal logic by auto-opening it
-    // effectively making the 'Forge View' just a placeholder that triggers the modal?
-    // No, that's bad UX.
-
-    // Let's assume for this MVP step we render a button to Open Forge, 
-    // OR we should ideally Refactor Forge.tsx to separate Content from Modal wrapper.
-    // Given the constraints, I will create a view that mounts the Forge component
-    // forcing isOpen={true} and removing the onClose capability (hide close button via CSS or prop).
-
     return (
-        <div className="w-full h-[calc(100vh-8rem)] flex items-center justify-center p-4">
-            <Forge isOpen={true} onClose={() => { }} />
+        <div className="w-full min-h-screen flex flex-col items-center pt-8">
+            <Forge />
         </div>
     );
 }

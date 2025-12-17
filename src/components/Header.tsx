@@ -13,23 +13,30 @@ export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
     const totalItems = Object.values(masterCollection).flat().length;
     const uniqueItems = new Set(inventory).size;
 
-    // XP Progress Calculation
-    // Level N requires 100 * N^2 XP.
-    // Next Level (N+1) requires 100 * (N+1)^2.
-    // Current progress = (xp - currentLevelBase) / (nextLevelBase - currentLevelBase)
-    const currentLevelBase = 100 * Math.pow(level - 1, 2);
-    const nextLevelBase = 100 * Math.pow(level, 2);
-    const progressPercent = Math.min(100, Math.max(0, ((xp - currentLevelBase) / (nextLevelBase - currentLevelBase)) * 100));
+    const progress = (xp / nextLevelXp) * 100;
 
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-50">
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 shrink-0">
-                    <div className="relative w-10 h-10 bg-indigo-500 rounded flex items-center justify-center">
-                        <Zap className="text-white w-5 h-5 relative z-10" />
-                        <div className="absolute inset-x-0 bottom-0 bg-black/20 h-full">
-                            <div className="bg-indigo-300 w-full absolute bottom-0 left-0 transition-all" style={{ height: `${progressPercent}%`, opacity: 0.3 }} />
-                        </div>
+                {/* Identity / Level */}
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center relative overflow-hidden group border border-indigo-400/30">
+                        {/* Progress Fill */}
+                        <div
+                            className="absolute bottom-0 left-0 right-0 bg-teal-400/20 transition-all duration-1000 ease-out"
+                            style={{ height: `${progress}%` }}
+                        />
+                        <Image
+                            src="/icon.png"
+                            alt="Logo"
+                            width={24}
+                            height={24}
+                            className="relative z-10 rounded-sm"
+                        />
+                    </div>
+                    <div>
+                        <h1 className="font-bold text-slate-100 leading-tight">SPRITE<span className="text-indigo-500">SCAVENGER</span></h1>
+                        <p className="text-[10px] text-slate-400 font-mono">Lvl.{level} <span className="text-slate-600">|</span> {Math.floor(xp)}/{nextLevelXp} XP</p>
                     </div>
                 </div>
 
