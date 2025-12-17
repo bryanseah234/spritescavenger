@@ -82,9 +82,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Save to LocalStorage
+  // Ref to hold latest state for the interval (avoids resetting timer)
+  const stateRef = React.useRef<Partial<GameState>>({});
+
   useEffect(() => {
-    if (isLoading) return;
-    const state: Partial<GameState> = { // Partial to allow lazy save if needed, though we save all
+    stateRef.current = {
       inventory,
       wallet,
       bits,
@@ -94,8 +96,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       activeBiome,
       expeditionStartTime,
     };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  }, [inventory, wallet, bits, xp, upgrades, unlockedBiomes, activeBiome, expeditionStartTime, isLoading]);
+  }, [inventory, wallet, bits, xp, upgrades, unlockedBiomes, activeBiome, expeditionStartTime]);
+
+  // Save to LocalStorage periodically (Debounced/Throttled)
+  useEffect(() => {
+    if (isLoading) return;
+
+    const interval = setInterval(() => {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(stateRef.current));
+    }, 2000); // Save every 2 seconds max
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const addToInventory = (items: string[]) => {
     setInventory((prev) => [...prev, ...items]);

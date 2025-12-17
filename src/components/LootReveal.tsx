@@ -1,6 +1,5 @@
 import { Copy, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import masterCollection from "@/data/master-collection.json";
 import { getRarity } from "@/utils/rarity";
 import { useGame } from "@/context/GameContext";
 
@@ -103,21 +102,21 @@ export default function LootReveal({ loot, onClaim }: LootRevealProps) {
     );
 }
 
+import Image from "next/image";
+import { getCategory } from "@/utils/lookup";
+
 function LootImage({ slug }: { slug: string }) {
-    // Helper to find category
-    let category = "Unknown";
-    for (const [cat, items] of Object.entries(masterCollection)) {
-        if ((items as string[]).includes(slug)) {
-            category = cat;
-            break;
-        }
-    }
+    const category = getCategory(slug);
 
     return (
-        <img
-            src={`/icons/${category}/${slug}.png`}
-            alt={slug}
-            className="w-full h-full object-contain pixelated rendering-pixelated"
-        />
+        <div className="relative w-full h-full">
+            <Image
+                src={`/icons/${category}/${slug}.png`}
+                alt={slug}
+                fill
+                className="object-contain pixelated rendering-pixelated"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+        </div>
     )
 }

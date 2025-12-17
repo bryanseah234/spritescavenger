@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 import { Lock } from "lucide-react";
@@ -55,10 +56,12 @@ export default function CollectionGrid() {
                                     {isOwned ? (
                                         <>
                                             <div className="w-full h-full p-2">
-                                                <img
+                                                <Image
                                                     src={`/icons/${activeTab}/${slug}.png`}
                                                     alt={slug}
-                                                    className="w-full h-full object-contain pixelated rendering-pixelated"
+                                                    fill
+                                                    className="object-contain pixelated rendering-pixelated"
+                                                    sizes="(max-width: 768px) 25vw, (max-width: 1200px) 16vw, 12vw"
                                                 />
                                             </div>
                                             <div className="absolute inset-0 bg-slate-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center rounded p-1">
