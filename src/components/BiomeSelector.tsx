@@ -28,7 +28,7 @@ export default function BiomeSelector() {
                             key={biome.id}
                             layoutId={biome.id}
                             className={`
-                        relative flex-shrink-0 w-48 h-64 rounded-xl border-2 p-4 flex flex-col justify-between
+                        relative shrink-0 w-48 h-64 rounded-xl border-2 p-4 flex flex-col justify-between
                         transition-all duration-300 snap-center
                         ${isActive ? `bg-${biome.color} border-${biome.color} ring-4 ring-${biome.color}/30 scale-105` : ''}
                         ${!isActive && isUnlocked ? 'bg-slate-800 border-slate-700 hover:border-slate-500 cursor-pointer' : ''}

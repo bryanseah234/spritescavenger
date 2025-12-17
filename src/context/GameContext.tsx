@@ -1,8 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import masterCollection from "@/data/master-collection.json";
-import { getRarity } from "@/utils/rarity";
 
 interface GameState {
   inventory: string[];
