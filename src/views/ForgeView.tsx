@@ -16,7 +16,7 @@ export default function ForgeView() {
     // Better: Refactor Forge to be a standard component, or create a 'ForgeScreen'.
 
     return (
-        <div className="w-full min-h-screen flex flex-col items-center pt-8">
+        <div className="w-full min-h-screen flex flex-col items-center">
             <Forge />
         </div>
     );

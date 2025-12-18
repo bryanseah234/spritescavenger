@@ -200,19 +200,21 @@ export default function SettingsView() {
                             </button>
                         </div>
 
-                        {/* Danger Zone */}
-                        <div className="pt-8">
-                            <button
-                                onClick={handleReset}
-                                className="w-full py-4 rounded-xl border border-red-900/30 hover:border-red-500 bg-red-950/10 hover:bg-red-900/20 text-red-700 hover:text-red-400 font-bold transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                Initiate Factory Reset
-                            </button>
-                        </div>
+
                     </div>
                 </section>
 
+            </div>
+
+            {/* Danger Zone */}
+            <div className="pt-0">
+                <button
+                    onClick={handleReset}
+                    className="w-full py-4 rounded-xl border border-red-900/30 hover:border-red-500 bg-red-950/10 hover:bg-red-900/20 text-red-700 hover:text-red-400 font-bold transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    Initiate Factory Reset
+                </button>
             </div>
         </div>
     );

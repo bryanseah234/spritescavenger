@@ -10,6 +10,18 @@ export default function CollectionGrid() {
     const categories = Object.keys(masterCollection);
     const [activeCategory, setActiveCategory] = useState(categories[0]);
 
+    const getCategoryCount = (cat: string) => {
+        // @ts-expect-error JSON key access
+        const items = masterCollection[cat] as string[];
+        const total = items.length;
+        const owned = items.filter(slug => inventory.includes(slug)).length;
+        return { owned, total };
+    };
+
+    const formatName = (slug: string) => {
+        return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
     return (
         <div className="w-full max-w-6xl mx-auto p-4 pb-32 flex flex-col gap-6">
             {/* Category Grid (3x3) */}
@@ -19,14 +31,17 @@ export default function CollectionGrid() {
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
                         className={`
-                            px-4 py-3 rounded-xl text-sm font-bold transition-all border
+                            px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all border flex flex-col items-center justify-center gap-1
                             ${activeCategory === cat
                                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/50'
                                 : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-200 hover:border-slate-600'
                             }
                         `}
                     >
-                        {cat}
+                        <span>{cat}</span>
+                        <span className={`text-[10px] ${activeCategory === cat ? 'text-indigo-200' : 'text-slate-600'}`}>
+                            ({getCategoryCount(cat).owned}/{getCategoryCount(cat).total})
+                        </span>
                     </button>
                 ))}
             </div>
@@ -56,33 +71,34 @@ export default function CollectionGrid() {
                                     <>
                                         <div className="w-full h-full p-2 relative">
                                             <Image
-                                                src={`/icons/${activeCategory}/${slug}.png`}
+                                                src={`/icons/${encodeURIComponent(activeCategory)}/${slug}.png`}
                                                 alt={slug}
                                                 fill
                                                 className="object-contain pixelated rendering-pixelated"
                                                 sizes="100px"
+                                                onError={(e) => {
+                                                    // Fallback if image fails?
+                                                    console.warn(`Failed to load icon: ${slug}`);
+                                                }}
                                             />
                                         </div>
                                         {/* Tooltip */}
-                                        <div className="absolute inset-0 bg-slate-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center rounded p-1 z-10 pointer-events-none">
+                                        <div className="absolute inset-0 bg-slate-900/90 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center rounded p-1 z-10 pointer-events-none border border-slate-700">
                                             <span
                                                 className="text-[8px] font-mono text-center px-1 break-all font-bold mb-1 leading-tight"
                                                 style={{ color: rarity.hex }}
                                             >
-                                                {slug.split('-').pop()}
+                                                {formatName(slug)}
                                             </span>
                                         </div>
                                     </>
                                 ) : (
-                                    // Locked Hint (Silhouette)
-                                    <div className="w-full h-full p-2 relative opacity-20 brightness-0 pointer-events-none grayscale">
-                                        <Image
-                                            src={`/icons/${activeCategory}/${slug}.png`}
-                                            alt="Locked"
-                                            fill
-                                            className="object-contain pixelated rendering-pixelated"
-                                            sizes="100px"
-                                        />
+                                    // Locked State
+                                    <div className="flex flex-col items-center justify-center gap-1 opacity-40">
+                                        <Lock className="w-4 h-4 text-slate-600" />
+                                        <span className="text-[8px] font-bold text-center text-slate-600 px-1 leading-tight hidden sm:block">
+                                            {formatName(slug)}
+                                        </span>
                                     </div>
                                 )}
                             </div>

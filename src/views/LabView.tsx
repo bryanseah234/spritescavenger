@@ -35,7 +35,7 @@ export default function LabView() {
                         <Cpu className="w-5 h-5" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-100">Range Calibration</h2>
+                        <h2 className="text-xl font-bold text-slate-100">Range</h2>
                         <p className="text-xs text-slate-500">Unlock and select target biomes.</p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@ export default function LabView() {
                         <Zap className="w-5 h-5" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-100">Hardware Lab</h2>
+                        <h2 className="text-xl font-bold text-slate-100">Hardware</h2>
                         <p className="text-xs text-slate-500">Upgrade internal components.</p>
                     </div>
                 </div>
