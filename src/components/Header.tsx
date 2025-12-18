@@ -50,7 +50,7 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
                 {/* Dropdown Menu */}
                 {isMenuOpen && (
                     <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50 flex flex-col">
-                        {['terminal', 'lab', 'forge', 'database'].map(tab => (
+                        {['map', 'lab', 'forge', 'database'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => {

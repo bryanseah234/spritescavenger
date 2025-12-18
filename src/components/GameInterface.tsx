@@ -10,7 +10,7 @@ import CollectionView from "@/views/CollectionView";
 import ForgeView from "@/views/ForgeView";
 import LabView from "@/views/LabView";
 import CommandPalette from "@/components/CommandPalette";
-import { Terminal, Cpu, Hammer, Database, Settings } from "lucide-react";
+import { Map, Cpu, Hammer, Database, Settings } from "lucide-react";
 
 interface GameInterfaceProps {
     currentTab: string;
@@ -44,7 +44,7 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
             if (commandOpen) return;
 
             // Tab Switching
-            if (e.key === '1') router.push('/terminal');
+            if (e.key === '1') router.push('/map');
             if (e.key === '2') router.push('/lab');
             if (e.key === '3') router.push('/forge');
             if (e.key === '4') router.push('/database');
@@ -79,7 +79,7 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
             />
 
             <div className="w-full">
-                {currentTab === 'terminal' && <ExpeditionView />}
+                {currentTab === 'map' && <ExpeditionView />}
                 {currentTab === 'lab' && <LabView />}
                 {currentTab === 'forge' && <ForgeView />}
                 {currentTab === 'database' && <CollectionView />}
@@ -97,11 +97,11 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
             {/* Mobile Nav Bar - Fixed Bottom */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 flex justify-around z-50 pb-safe">
                 <button
-                    onClick={() => router.push('/terminal')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'terminal' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    onClick={() => router.push('/map')}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'map' ? 'text-indigo-400' : 'text-slate-500'}`}
                 >
-                    <Terminal className="w-5 h-5 mb-1" />
-                    <span className="text-[9px] font-bold">TERM</span>
+                    <Map className="w-5 h-5 mb-1" />
+                    <span className="text-[9px] font-bold">MAP</span>
                 </button>
                 <button
                     onClick={() => router.push('/lab')}

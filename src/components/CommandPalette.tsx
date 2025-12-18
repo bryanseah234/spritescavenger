@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Hash, ArrowRight, Database, Hammer, Cpu, Terminal } from "lucide-react";
+import { Search, Hash, ArrowRight, Database, Hammer, Cpu, Map } from "lucide-react";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 import { getRarity } from "@/utils/rarity";
@@ -40,7 +40,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
     // --- Search Logic ---
     // 1. Navigation Commands
     const navCommands: PaletteItem[] = [
-        { id: 'nav-term', label: 'Go to Terminal', type: 'NAV', value: 'terminal', icon: Terminal },
+        { id: 'nav-map', label: 'Go to Map', type: 'NAV', value: 'map', icon: Map },
         { id: 'nav-lab', label: 'Go to Lab', type: 'NAV', value: 'lab', icon: Cpu },
         { id: 'nav-forge', label: 'Go to Forge', type: 'NAV', value: 'forge', icon: Hammer },
         { id: 'nav-db', label: 'Go to Database', type: 'NAV', value: 'database', icon: Database },

@@ -63,13 +63,12 @@ export default function SettingsView() {
         <div className="w-full max-w-5xl mx-auto p-6 pb-32 space-y-8 animate-in fade-in duration-500">
 
             {/* Header */}
-            <div className="flex items-center gap-4 border-b border-slate-800 pb-6">
+            <div className="flex items-center gap-4 py-8 justify-center">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-700">
                     <Save className="w-8 h-8 text-indigo-500" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-100">System Configuration</h1>
-                    <p className="text-slate-400">Manage user profile and save data.</p>
+                    <h1 className="text-3xl font-bold text-slate-100">System</h1>
                 </div>
             </div>
 
