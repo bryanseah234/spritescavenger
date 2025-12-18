@@ -113,7 +113,7 @@ export default function SettingsView() {
                                     value={nameInput}
                                     onChange={(e) => setNameInput(e.target.value)}
                                     maxLength={20}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
                                     placeholder="Enter Name..."
                                 />
                             </div>
@@ -126,7 +126,7 @@ export default function SettingsView() {
                                     value={titleInput}
                                     onChange={(e) => setTitleInput(e.target.value)}
                                     maxLength={30}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
                                     placeholder="Enter Title..."
                                 />
                             </div>

@@ -130,7 +130,7 @@ export default function Forge() {
                         <div className={`absolute inset-0 bg-orange-500/20 blur-3xl rounded-full transition-opacity duration-500 ${selectedItems.length === 10 ? 'opacity-100' : 'opacity-0'}`} />
 
                         <div className={`w-32 h-32 rounded-2xl flex items-center justify-center border-2 transition-all duration-300 relative z-10
-                            ${selectedItems.length === 10 ? 'bg-slate-900 border-orange-500/50 shadow-xl shadow-orange-900/20' : 'bg-slate-950 border-slate-800 border-dashed'}
+                            ${selectedItems.length === 10 ? 'bg-slate-900 border-orange-500/50 shadow-xl shadow-orange-900/20' : 'bg-[#222522] border-slate-800 border-dashed'}
                         `}>
                             <span className={`text-4xl transition-colors ${selectedItems.length === 10 ? 'text-orange-400 animate-pulse' : 'text-slate-700'}`}>?</span>
                         </div>

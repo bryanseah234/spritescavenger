@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-200 antialiased">
+      <body className="bg-[#222522] text-slate-200 antialiased">
         <ErrorBoundary>
           <GameProvider>
             {children}

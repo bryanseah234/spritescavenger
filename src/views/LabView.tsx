@@ -64,7 +64,7 @@ export default function LabView() {
                         return (
                             <div key={type} className="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between gap-4 group hover:border-indigo-500/30 transition-all">
                                 <div className="flex items-start gap-3">
-                                    <div className="shrink-0 w-12 h-12 bg-slate-950 rounded-lg flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
+                                    <div className="shrink-0 w-12 h-12 bg-[#222522] rounded-lg flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
                                         <info.icon className="w-6 h-6" />
                                     </div>
                                     <div>

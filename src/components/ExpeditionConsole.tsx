@@ -20,12 +20,9 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
             {/* Instructions & Greeting */}
             <div className="text-center space-y-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
-                        Sprite Scavenger
-                    </h1>
-                    <p className="text-slate-500 font-mono text-xs uppercase tracking-widest mt-1">
+                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight uppercase">
                         Welcome back, {playerName}
-                    </p>
+                    </h1>
                 </div>
 
                 <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">

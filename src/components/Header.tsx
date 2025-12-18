@@ -24,7 +24,7 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
     const nextLevelXp = nextLevelBase;
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 z-50">
+        <header className="fixed top-0 left-0 right-0 h-16 bg-[#222522] border-b border-slate-800 flex items-center justify-between px-6 z-50">
             {/* Left: Logo & Nav */}
             {/* Left: Logo & Dropdown Nav */}
             <div className="relative">

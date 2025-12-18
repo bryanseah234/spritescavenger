@@ -34,7 +34,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     public render() {
         if (this.state.hasError) {
             return (
-                <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-center">
+                <div className="min-h-screen bg-[#222522] flex flex-col items-center justify-center p-4 text-center">
                     <h1 className="text-2xl font-bold text-red-500 mb-4">Application Error</h1>
                     <p className="text-slate-400 mb-4 max-w-md">
                         Something went wrong. It might be due to a corrupted save file or an unexpected state.

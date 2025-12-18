@@ -152,7 +152,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
                                 {item.type === 'ITEM' && (
                                     <div className="flex items-center gap-2">
                                         <span
-                                            className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-950"
+                                            className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[#222522]"
                                             style={{ color: item.rarity?.hex }}
                                         >
                                             {item.rarity?.name}
