@@ -1,21 +1,52 @@
-import { useExpedition } from "@/hooks/useExpedition";
+import { useState } from "react";
+import { useGame } from "@/context/GameContext";
 import ExpeditionConsole from "@/components/ExpeditionConsole";
 import LootReveal from "@/components/LootReveal";
+import ExpeditionGame from "@/components/ExpeditionGame";
 
 export default function ExpeditionView() {
-    const { isActive, timeLeft, totalDuration, start, claim, loot } = useExpedition();
+    const { addToInventory } = useGame();
+    const [gameState, setGameState] = useState<'IDLE' | 'PLAYING' | 'REVEAL'>('IDLE');
+    const [loot, setLoot] = useState<string[] | null>(null);
+
+    const handleStart = () => {
+        setGameState('PLAYING');
+    };
+
+    const handleGameComplete = (earnedLoot: string[]) => {
+        addToInventory(earnedLoot);
+        setLoot(earnedLoot);
+        setGameState('REVEAL');
+    };
+
+    const handleClaim = () => {
+        setLoot(null);
+        setGameState('IDLE');
+    };
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto px-4 justify-center min-h-[60vh]">
-            <ExpeditionConsole
-                isActive={isActive}
-                timeLeft={timeLeft}
-                totalDuration={totalDuration}
-                onStart={start}
-                onOpenShop={() => { }} // No-op, shop is now separate tab
-            />
+        <div className="flex flex-col gap-6 w-full h-[calc(100vh-80px)]">
+            {gameState === 'IDLE' && (
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <ExpeditionConsole
+                        isActive={false} // Always false now, no timer
+                        timeLeft={0}
+                        totalDuration={100}
+                        onStart={handleStart}
+                        onOpenShop={() => { }}
+                    />
+                </div>
+            )}
 
-            <LootReveal loot={loot} onClaim={claim} />
+            {gameState === 'PLAYING' && (
+                <div className="flex-1 bg-black relative">
+                    <ExpeditionGame onComplete={handleGameComplete} />
+                </div>
+            )}
+
+            {gameState === 'REVEAL' && loot && (
+                <LootReveal loot={loot} onClaim={handleClaim} />
+            )}
         </div>
     );
 }
