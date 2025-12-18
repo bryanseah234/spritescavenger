@@ -12,17 +12,17 @@ export default function CollectionGrid() {
 
     return (
         <div className="w-full max-w-6xl mx-auto p-4 pb-32 flex flex-col gap-6">
-            {/* Category Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Category Grid (3x3) */}
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-3">
                 {categories.map((cat) => (
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
                         className={`
-                            px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors
+                            px-4 py-3 rounded-xl text-sm font-bold transition-all border
                             ${activeCategory === cat
-                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/50'
-                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/50'
+                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-200 hover:border-slate-600'
                             }
                         `}
                     >
@@ -74,7 +74,16 @@ export default function CollectionGrid() {
                                         </div>
                                     </>
                                 ) : (
-                                    <Lock className="w-4 h-4 text-slate-800" />
+                                    // Locked Hint (Silhouette)
+                                    <div className="w-full h-full p-2 relative opacity-20 brightness-0 pointer-events-none grayscale">
+                                        <Image
+                                            src={`/icons/${activeCategory}/${slug}.png`}
+                                            alt="Locked"
+                                            fill
+                                            className="object-contain pixelated rendering-pixelated"
+                                            sizes="100px"
+                                        />
+                                    </div>
                                 )}
                             </div>
                         );

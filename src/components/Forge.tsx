@@ -56,8 +56,8 @@ export default function Forge() {
             <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 relative">
 
                 <div className="flex items-center gap-3 mb-8">
-                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center animate-pulse">
-                        <Flame className="text-white w-6 h-6" />
+                    <div className="p-3 bg-orange-500/20 rounded-lg text-orange-400">
+                        <Flame className="w-6 h-6" />
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold text-slate-100">The Forge</h2>

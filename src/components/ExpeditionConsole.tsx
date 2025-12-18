@@ -1,4 +1,4 @@
-import { Play, Cpu } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface ExpeditionConsoleProps {
     isActive: boolean;
@@ -14,7 +14,19 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
         : 0;
 
     return (
-        <div className="w-full max-w-md mx-auto p-4">
+        <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6">
+            {/* Instructions */}
+            <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+                    Sprite Scavenger
+                </h1>
+                <div className="text-sm text-slate-400 space-y-1">
+                    <p>1. Start an Expedition to find data fragments.</p>
+                    <p>2. Collect items and earn Bits.</p>
+                    <p>3. Upgrade your hardware in the Lab.</p>
+                </div>
+            </div>
+
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-xl relative overflow-hidden">
                 {isActive ? (
                     <div className="space-y-4">
@@ -49,14 +61,6 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
                         >
                             <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
                             START EXPEDITION
-                        </button>
-
-                        <button
-                            onClick={onOpenShop}
-                            className="w-full bg-slate-900 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold py-2 rounded transition-all flex items-center justify-center gap-2"
-                        >
-                            <Cpu className="w-4 h-4" />
-                            HARDWARE LAB
                         </button>
                     </div>
                 )}

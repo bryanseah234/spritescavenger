@@ -1,4 +1,5 @@
-import { Trophy, Coins, Settings } from "lucide-react";
+import { useState } from "react";
+import { Trophy, Coins, Settings, ChevronDown } from "lucide-react";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 import Image from "next/image";
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ onSettingsClick, onOpenPalette, activeTab }: HeaderProps) {
     const { inventory, bits, xp, level } = useGame();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const totalItems = Object.values(masterCollection).flat().length;
     const uniqueItems = new Set(inventory).size;
@@ -24,37 +26,50 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
     return (
         <header className="fixed top-0 left-0 right-0 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 z-50">
             {/* Left: Logo & Nav */}
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
+            {/* Left: Logo & Dropdown Nav */}
+            <div className="relative">
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center gap-2 hover:bg-slate-900 p-2 rounded-lg transition-colors group"
+                >
                     <Image
                         src="/icon.png"
                         alt="Logo"
                         width={32}
                         height={32}
-                        className="object-contain" // Simplified: No bg, no borders
+                        className="object-contain bg-transparent"
                     />
-                    <div className="hidden lg:block">
-                        <h1 className="font-bold text-slate-100 leading-tight tracking-tight">SPRITE<span className="text-indigo-500">SCAVENGER</span></h1>
+                    <div className="hidden lg:block text-left">
+                        <h1 className="font-bold text-slate-100 leading-tight tracking-tight flex items-center gap-2">
+                            SPRITE<span className="text-indigo-500">SCAVENGER</span>
+                            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
+                        </h1>
                     </div>
-                </div>
+                </button>
 
-                <nav className="hidden md:flex items-center gap-1">
-                    {['terminal', 'lab', 'forge', 'database'].map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => onSettingsClick(tab)}
-                            className={`
-                                px-4 py-2 rounded text-xs font-bold uppercase tracking-wider transition-all
-                                ${activeTab === tab
-                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                                }
-                            `}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </nav>
+                {/* Dropdown Menu */}
+                {isMenuOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden py-1 z-50 flex flex-col">
+                        {['terminal', 'lab', 'forge', 'database'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => {
+                                    onSettingsClick(tab);
+                                    setIsMenuOpen(false);
+                                }}
+                                className={`
+                                    px-4 py-3 text-left text-xs font-bold uppercase tracking-wider transition-colors
+                                    ${activeTab === tab
+                                        ? 'bg-indigo-600/10 text-indigo-400 border-l-2 border-indigo-500'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                                    }
+                                `}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Center: Search Bar */}
