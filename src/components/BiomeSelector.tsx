@@ -17,9 +17,8 @@ export default function BiomeSelector() {
     const { unlockedBiomes, activeBiome, bits, unlockBiome, setActiveBiome } = useGame();
 
     return (
-        <div className="w-full max-w-4xl mx-auto px-4 mb-8">
-            <h2 className="text-slate-400 text-sm font-bold uppercase mb-4">Range Calibration</h2>
-            <div className="flex flex-wrap gap-4">
+        <div className="w-full mx-auto px-0 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {BIOMES.map((biome) => {
                     const isUnlocked = unlockedBiomes.includes(biome.id);
                     const isActive = activeBiome === biome.id;
@@ -30,7 +29,7 @@ export default function BiomeSelector() {
                         <div // Removed motion.div for simple layout fix first, can add back if needed but complexity risk
                             key={biome.id}
                             className={`
-                        relative w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.33%-0.7rem)] h-64 rounded-xl border-2 p-4 flex flex-col justify-between
+                        relative w-full h-64 rounded-xl border-2 p-4 flex flex-col justify-between
                         transition-all duration-200
                         ${isActive ? `bg-indigo-900/20 border-indigo-500 scale-[1.02]` : ''}
                         ${!isActive && isUnlocked ? 'bg-slate-900 border-slate-800 hover:border-slate-600 cursor-pointer' : ''}

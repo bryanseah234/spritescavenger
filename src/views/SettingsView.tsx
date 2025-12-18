@@ -87,7 +87,7 @@ export default function SettingsView() {
 
                         {/* ID Badge Preview */}
                         <div className="flex items-start gap-6 mb-8 relative z-10">
-                            <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/20">
+                            <div className="w-24 h-24 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/20">
                                 <span className="text-3xl font-bold text-white">{nameInput.charAt(0).toUpperCase()}</span>
                             </div>
                             <div className="flex-1 space-y-1">

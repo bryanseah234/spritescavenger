@@ -17,7 +17,7 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
         <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6">
             {/* Instructions */}
             <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-400 to-cyan-400">
                     Sprite Scavenger
                 </h1>
                 <div className="text-sm text-slate-400 space-y-1">
