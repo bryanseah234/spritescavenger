@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import SettingsView from "@/views/SettingsView";
+import { useGame } from "@/context/GameContext";
+import ExpeditionView from "@/views/ExpeditionView";
+import CollectionView from "@/views/CollectionView";
+import ForgeView from "@/views/ForgeView";
+import LabView from "@/views/LabView";
 import CommandPalette from "@/components/CommandPalette";
 import { Terminal, Cpu, Hammer, Database, Settings } from "lucide-react";
 
