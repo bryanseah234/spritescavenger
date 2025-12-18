@@ -1,4 +1,5 @@
 import { Play } from "lucide-react";
+import { useGame } from "@/context/GameContext";
 
 interface ExpeditionConsoleProps {
     isActive: boolean;
@@ -9,29 +10,36 @@ interface ExpeditionConsoleProps {
 }
 
 export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, onStart, onOpenShop }: ExpeditionConsoleProps) {
+    const { playerName } = useGame();
     const progress = isActive
         ? ((totalDuration - timeLeft) / totalDuration) * 100
         : 0;
 
     return (
         <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6">
-            {/* Instructions */}
-            <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-400 to-cyan-400">
-                    Sprite Scavenger
-                </h1>
-                <div className="text-sm text-slate-400 space-y-1">
+            {/* Instructions & Greeting */}
+            <div className="text-center space-y-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+                        Sprite Scavenger
+                    </h1>
+                    <p className="text-slate-500 font-mono text-xs uppercase tracking-widest mt-1">
+                        Welcome back, {playerName}
+                    </p>
+                </div>
+
+                <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">
                     <p>1. Start an Expedition to find data fragments.</p>
                     <p>2. Collect items and earn Bits.</p>
                     <p>3. Upgrade your hardware in the Lab.</p>
                 </div>
             </div>
 
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-xl relative overflow-hidden">
+            <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700 shadow-2xl relative overflow-hidden backdrop-blur-sm">
                 {isActive ? (
                     <div className="space-y-4">
                         <div className="flex justify-between items-end text-slate-300">
-                            <span className="text-xs uppercase tracking-widest animate-pulse">Scanning Sector...</span>
+                            <span className="text-xs uppercase tracking-widest animate-pulse text-emerald-500">Scanning Sector...</span>
                             <span className="font-mono text-lg text-emerald-400">{timeLeft}s</span>
                         </div>
 
@@ -57,7 +65,7 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
 
                         <button
                             onClick={onStart}
-                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded shadow-lg shadow-indigo-900/20 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group"
+                            className="w-full bg-slate-200 hover:bg-white text-slate-900 font-bold py-4 rounded-lg shadow-lg active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group"
                         >
                             <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
                             START EXPEDITION
