@@ -26,6 +26,13 @@ export default function CollectionGrid() {
         return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
+    const getCategoryCount = (cat: string) => {
+        // @ts-expect-error JSON key access
+        const items = (masterCollection[cat] as string[]) || [];
+        const owned = items.filter(slug => inventory.includes(slug)).length;
+        return { owned, total: items.length };
+    };
+
     const getSortedItems = () => {
         // @ts-expect-error JSON key access
         const items = (masterCollection[activeCategory] as string[]) || [];

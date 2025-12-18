@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { GameProvider } from "@/context/GameContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Sprite Scavenger",
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-950 text-slate-200 antialiased">
-        <GameProvider>
-          {children}
-        </GameProvider>
+        <ErrorBoundary>
+          <GameProvider>
+            {children}
+          </GameProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

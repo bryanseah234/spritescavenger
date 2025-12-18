@@ -72,24 +72,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   // Load from LocalStorage
   useEffect(() => {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setInventory(parsed.inventory || []);
-        setWallet(parsed.wallet || 0);
-        setBits(parsed.bits || 0);
-        setXp(parsed.xp || 0);
-        setUpgrades(parsed.upgrades || DEFAULT_UPGRADES);
-        setUnlockedBiomes(parsed.unlockedBiomes || DEFAULT_BIOMES);
-        setActiveBiome(parsed.activeBiome || DEFAULT_ACTIVE_BIOME);
-        setExpeditionStartTime(parsed.expeditionStartTime || null);
-        setPlayerName(parsed.playerName || DEFAULT_PLAYER_NAME);
-        setPlayerTitle(parsed.playerTitle || DEFAULT_PLAYER_TITLE);
-      } catch (e) {
-        console.error("Failed to load save", e);
+    try {
+      const saved = localStorage.getItem(SAVE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          console.log("[GameContext] Save loaded successfully.", parsed);
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setInventory(parsed.inventory || []);
+          setWallet(parsed.wallet || 0);
+          setBits(parsed.bits || 0);
+          setXp(parsed.xp || 0);
+          setUpgrades(parsed.upgrades || DEFAULT_UPGRADES);
+          setUnlockedBiomes(parsed.unlockedBiomes || DEFAULT_BIOMES);
+          setActiveBiome(parsed.activeBiome || DEFAULT_ACTIVE_BIOME);
+          setExpeditionStartTime(parsed.expeditionStartTime || null);
+          setPlayerName(parsed.playerName || DEFAULT_PLAYER_NAME);
+          setPlayerTitle(parsed.playerTitle || DEFAULT_PLAYER_TITLE);
+        } catch (e) {
+          console.error("[GameContext] Failed to parse save file. Data might be corrupted.", e);
+          console.error("Raw data:", saved);
+        }
+      } else {
+        console.log("[GameContext] No save found. Starting fresh.");
       }
+    } catch (err) {
+      console.error("[GameContext] Critical error accessing localStorage:", err);
     }
     setIsLoading(false);
   }, []);
