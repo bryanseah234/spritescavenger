@@ -71,7 +71,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-950 pt-20 pb-0 overflow-x-hidden">
-      <Header onSettingsClick={handleNav} activeTab={activeTab} />
+      <Header
+        onSettingsClick={handleNav}
+        onOpenPalette={() => setCommandOpen(true)}
+        activeTab={activeTab}
+      />
 
       <div className="w-full">
         {activeTab === 'terminal' && <ExpeditionView />}

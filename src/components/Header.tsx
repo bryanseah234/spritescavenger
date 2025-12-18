@@ -5,109 +5,105 @@ import Image from "next/image";
 
 interface HeaderProps {
     onSettingsClick: (tab?: string) => void;
+    onOpenPalette: () => void;
     activeTab: string;
 }
 
-export default function Header({ onSettingsClick, activeTab }: HeaderProps) {
+export default function Header({ onSettingsClick, onOpenPalette, activeTab }: HeaderProps) {
     const { inventory, bits, xp, level } = useGame();
 
     const totalItems = Object.values(masterCollection).flat().length;
     const uniqueItems = new Set(inventory).size;
 
-    // XP Progress Calculation
+    // XP Progress
     const currentLevelBase = 100 * Math.pow(level - 1, 2);
     const nextLevelBase = 100 * Math.pow(level, 2);
     const progress = Math.min(100, Math.max(0, ((xp - currentLevelBase) / (nextLevelBase - currentLevelBase)) * 100));
-    const nextLevelXp = nextLevelBase; // For display
+    const nextLevelXp = nextLevelBase;
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 z-50">
-            <div className="flex items-center gap-4">
-                {/* Identity / Level */}
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center relative overflow-hidden group border border-indigo-400/30">
-                        {/* Progress Fill */}
-                        <div
-                            className="absolute bottom-0 left-0 right-0 bg-teal-400/20 transition-all duration-1000 ease-out"
-                            style={{ height: `${progress}%` }}
-                        />
-                        <Image
-                            src="/icon.png"
-                            alt="Logo"
-                            width={24}
-                            height={24}
-                            className="relative z-10 rounded-sm"
-                        />
-                    </div>
-                    <div>
-                        <h1 className="font-bold text-slate-100 leading-tight">SPRITE<span className="text-indigo-500">SCAVENGER</span></h1>
-                        <p className="text-[10px] text-slate-400 font-mono">Lvl.{level} <span className="text-slate-600">|</span> {Math.floor(xp)}/{nextLevelXp} XP</p>
+        <header className="fixed top-0 left-0 right-0 h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 z-50">
+            {/* Left: Logo & Nav */}
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    <Image
+                        src="/icon.png"
+                        alt="Logo"
+                        width={32}
+                        height={32}
+                        className="object-contain" // Simplified: No bg, no borders
+                    />
+                    <div className="hidden lg:block">
+                        <h1 className="font-bold text-slate-100 leading-tight tracking-tight">SPRITE<span className="text-indigo-500">SCAVENGER</span></h1>
                     </div>
                 </div>
 
-                {/* Desktop/Tablet Nav */}
                 <nav className="hidden md:flex items-center gap-1">
-                    <button
-                        onClick={() => onSettingsClick('terminal')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'terminal' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-                    >
-                        TERMINAL
-                    </button>
-                    <button
-                        onClick={() => onSettingsClick('lab')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'lab' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-                    >
-                        LAB
-                    </button>
-                    <button
-                        onClick={() => onSettingsClick('forge')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'forge' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-                    >
-                        FORGE
-                    </button>
-                    <button
-                        onClick={() => onSettingsClick('database')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${activeTab === 'database' ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}
-                    >
-                        DATABASE
-                    </button>
+                    {['terminal', 'lab', 'forge', 'database'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => onSettingsClick(tab)}
+                            className={`
+                                px-4 py-2 rounded text-xs font-bold uppercase tracking-wider transition-all
+                                ${activeTab === tab
+                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                                }
+                            `}
+                        >
+                            {tab}
+                        </button>
+                    ))}
                 </nav>
             </div>
 
-            <div className="flex items-center gap-4">
-                <div className="hidden sm:flex flex-col items-end">
-                    <div className="flex items-center gap-1 text-emerald-400">
-                        <Trophy className="w-3 h-3" />
-                        <span className="font-mono text-sm leading-none">{uniqueItems} / {totalItems}</span>
+            {/* Center: Search Bar */}
+            <div className="flex-1 max-w-md mx-4">
+                <button
+                    onClick={onOpenPalette}
+                    className="w-full bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-full h-10 px-4 flex items-center gap-3 group transition-colors"
+                >
+                    <Search className="w-4 h-4 text-slate-500 group-hover:text-indigo-400" />
+                    <span className="text-sm text-slate-500 font-medium">Search...</span>
+                    <span className="ml-auto text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-1.5 py-0.5 group-hover:border-slate-700">CMD+K</span>
+                </button>
+            </div>
+
+            {/* Right: Stats & Settings */}
+            <div className="flex items-center gap-6">
+
+                {/* Stats (Monochrome/Primary Theme) */}
+                <div className="hidden sm:flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                        <span className="text-xs font-bold text-slate-200">{uniqueItems} / {totalItems}</span>
+                        <span className="text-[10px] text-slate-500 font-bold uppercase">Items</span>
                     </div>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">Collection</span>
+                    <div className="w-px h-6 bg-slate-800" />
+                    <div className="flex flex-col items-end">
+                        <span className="text-xs font-bold text-indigo-400">{bits}</span>
+                        <span className="text-[10px] text-slate-500 font-bold uppercase">Bits</span>
+                    </div>
+                    <div className="w-px h-6 bg-slate-800" />
+                    <div className="flex flex-col items-end">
+                        <span className="text-xs font-bold text-slate-200">Lvl.{level}</span>
+                        <div className="w-16 h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+                            <div className="h-full bg-indigo-500" style={{ width: `${progress}%` }} />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-1 text-amber-400">
-                        <Coins className="w-3 h-3" />
-                        <span className="font-mono text-sm leading-none">{bits}</span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">Bits</span>
-                </div>
+                <div className="w-px h-6 bg-slate-800 hidden sm:block" />
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {/* Trigger palette? We need prop for this. Shortcuts work for now. */ }}
-                        className="hidden md:flex items-center gap-2 px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-500 hover:text-slate-300 transition-colors pointer-events-none"
-                    >
-                        <span className="text-[10px] font-mono">CMD+K</span>
-                    </button>
-                    <button
-                        onClick={() => onSettingsClick('settings')}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                        title="Settings"
-                    >
-                        <Settings className="w-5 h-5" />
-                    </button>
-                </div>
+                <button
+                    onClick={() => onSettingsClick('settings')}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-full transition-colors"
+                >
+                    <Settings className="w-5 h-5" />
+                </button>
             </div>
         </header>
     );
 }
+
+// Helper icon import
+import { Search } from "lucide-react";
