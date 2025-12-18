@@ -16,6 +16,8 @@ interface GameState {
   unlockedBiomes: string[];
   activeBiome: string;
   expeditionStartTime: number | null;
+  playerName: string;
+  playerTitle: string;
 }
 
 interface GameContextType extends GameState {
@@ -28,7 +30,9 @@ interface GameContextType extends GameState {
   burnItems: (slugs: string[]) => void; // Core for Forge
   startExpedition: () => void;
   endExpedition: () => void;
+  setPlayerProfile: (name: string, title: string) => void;
   exportSave: () => string;
+
   importSave: (base64: string) => boolean;
   isLoading: boolean;
   pendingLoot: string[] | null;
@@ -41,6 +45,8 @@ const SAVE_KEY = "sprite_scavenger_save";
 const DEFAULT_UPGRADES = { speed: 1, multithread: 1, luck: 1 };
 const DEFAULT_BIOMES = ['Depths'];
 const DEFAULT_ACTIVE_BIOME = 'Depths';
+const DEFAULT_PLAYER_NAME = "Scavenger";
+const DEFAULT_PLAYER_TITLE = "Novice";
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [inventory, setInventory] = useState<string[]>([]);
@@ -55,6 +61,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [expeditionStartTime, setExpeditionStartTime] = useState<number | null>(
     null
   );
+  const [playerName, setPlayerName] = useState<string>(DEFAULT_PLAYER_NAME);
+  const [playerTitle, setPlayerTitle] = useState<string>(DEFAULT_PLAYER_TITLE);
   const [pendingLoot, setPendingLoot] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,6 +85,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         setUnlockedBiomes(parsed.unlockedBiomes || DEFAULT_BIOMES);
         setActiveBiome(parsed.activeBiome || DEFAULT_ACTIVE_BIOME);
         setExpeditionStartTime(parsed.expeditionStartTime || null);
+        setPlayerName(parsed.playerName || DEFAULT_PLAYER_NAME);
+        setPlayerTitle(parsed.playerTitle || DEFAULT_PLAYER_TITLE);
       } catch (e) {
         console.error("Failed to load save", e);
       }
@@ -98,8 +108,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       unlockedBiomes,
       activeBiome,
       expeditionStartTime,
+      playerName,
+      playerTitle,
     };
-  }, [inventory, wallet, bits, xp, upgrades, unlockedBiomes, activeBiome, expeditionStartTime]);
+  }, [inventory, wallet, bits, xp, upgrades, unlockedBiomes, activeBiome, expeditionStartTime, playerName, playerTitle]);
 
   // Save to LocalStorage periodically (Debounced/Throttled)
   useEffect(() => {
@@ -164,6 +176,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setExpeditionStartTime(null);
   };
 
+  const setPlayerProfile = (name: string, title: string) => {
+    setPlayerName(name);
+    setPlayerTitle(title);
+  };
+
   const exportSave = () => {
     const state: GameState = {
       inventory,
@@ -174,7 +191,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       upgrades,
       unlockedBiomes,
       activeBiome,
-      expeditionStartTime
+      expeditionStartTime,
+      playerName,
+      playerTitle
     };
     return btoa(JSON.stringify(state));
   };
@@ -194,6 +213,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       setUnlockedBiomes(parsed.unlockedBiomes || DEFAULT_BIOMES);
       setActiveBiome(parsed.activeBiome || DEFAULT_ACTIVE_BIOME);
       setExpeditionStartTime(parsed.expeditionStartTime || null);
+      setPlayerName(parsed.playerName || DEFAULT_PLAYER_NAME);
+      setPlayerTitle(parsed.playerTitle || DEFAULT_PLAYER_TITLE);
       return true;
     } catch (e) {
       console.error("Import failed", e);
@@ -215,6 +236,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         unlockedBiomes,
         activeBiome,
         expeditionStartTime,
+        playerName,
+        playerTitle,
         addToInventory,
         addBits,
         addXp,
@@ -224,6 +247,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         burnItems,
         startExpedition,
         endExpedition,
+        setPlayerProfile,
         exportSave,
         importSave,
         isLoading,

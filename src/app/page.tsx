@@ -2,20 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import SettingsModal from "@/components/SettingsModal";
-import { useGame } from "@/context/GameContext";
-import ExpeditionView from "@/views/ExpeditionView";
-import CollectionView from "@/views/CollectionView";
-import ForgeView from "@/views/ForgeView";
-import LabView from "@/views/LabView";
+import SettingsView from "@/views/SettingsView";
 import CommandPalette from "@/components/CommandPalette";
-import { Terminal, Cpu, Hammer, Database } from "lucide-react";
+import { Terminal, Cpu, Hammer, Database, Settings } from "lucide-react";
 
 export default function Home() {
   const { isLoading } = useGame();
 
   const [activeTab, setActiveTab] = useState('terminal');
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -36,27 +30,25 @@ export default function Home() {
       // Close on Escape
       if (e.key === 'Escape') {
         if (commandOpen) setCommandOpen(false);
-        if (settingsOpen) setSettingsOpen(false);
       }
 
       // Ignore other shortcuts if inputs or modals are open
-      if (commandOpen || settingsOpen) return;
+      if (commandOpen) return;
 
       // Tab Switching
       if (e.key === '1') setActiveTab('terminal');
       if (e.key === '2') setActiveTab('lab');
       if (e.key === '3') setActiveTab('forge');
       if (e.key === '4') setActiveTab('database');
+      if (e.key === '5') setActiveTab('settings');
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [commandOpen, settingsOpen]);
+  }, [commandOpen]);
 
   const handleNav = (tab?: string) => {
-    if (tab === 'settings') {
-      setSettingsOpen(true);
-    } else if (tab) {
+    if (tab) {
       setActiveTab(tab);
     }
   };
@@ -82,9 +74,9 @@ export default function Home() {
         {activeTab === 'lab' && <LabView />}
         {activeTab === 'forge' && <ForgeView />}
         {activeTab === 'database' && <CollectionView />}
+        {activeTab === 'settings' && <SettingsView />}
       </div>
 
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <CommandPalette
         isOpen={commandOpen}
         onClose={() => setCommandOpen(false)}
@@ -122,6 +114,13 @@ export default function Home() {
         >
           <Database className="w-5 h-5 mb-1" />
           <span className="text-[9px] font-bold">DB</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`flex flex-col items-center p-2 rounded w-16 ${activeTab === 'settings' ? 'text-indigo-400' : 'text-slate-500'}`}
+        >
+          <Settings className="w-5 h-5 mb-1" />
+          <span className="text-[9px] font-bold">SYS</span>
         </button>
       </div>
     </main>
