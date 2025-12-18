@@ -1,7 +1,11 @@
+"use client";
+
 import { Copy, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRarity } from "@/utils/rarity";
 import { useGame } from "@/context/GameContext";
+import Image from "next/image";
+import { getCategory } from "@/utils/lookup";
 
 interface LootRevealProps {
     loot: string[] | null;
@@ -102,8 +106,6 @@ export default function LootReveal({ loot, onClaim }: LootRevealProps) {
     );
 }
 
-import Image from "next/image";
-import { getCategory } from "@/utils/lookup";
 
 function LootImage({ slug }: { slug: string }) {
     const category = getCategory(slug);

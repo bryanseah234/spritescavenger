@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGame } from "@/context/GameContext";
 import { Copy, Check, Upload, Save, AlertTriangle, User, Hash, Tag, Trash2 } from "lucide-react";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 export default function SettingsView() {
     const {
@@ -21,6 +22,7 @@ export default function SettingsView() {
     const [copySuccess, setCopySuccess] = useState(false);
     const [importError, setImportError] = useState(false);
     const [importSuccess, setImportSuccess] = useState(false);
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
     // Profile Handling
     const handleSaveProfile = () => {
@@ -53,10 +55,12 @@ export default function SettingsView() {
     };
 
     const handleReset = () => {
-        if (confirm("Are you sure you want to WIPE your save? This cannot be undone.")) {
-            localStorage.clear();
-            window.location.reload();
-        }
+        setIsResetModalOpen(true);
+    };
+
+    const confirmReset = () => {
+        localStorage.clear();
+        window.location.reload();
     };
 
     return (
@@ -215,6 +219,16 @@ export default function SettingsView() {
                     Initiate Factory Reset
                 </button>
             </div>
-        </div>
+
+            <ConfirmationModal
+                isOpen={isResetModalOpen}
+                title="FACTORY RESET"
+                message="Are you sure you want to wipe all data? This action cannot be undone and your progress will be lost forever."
+                confirmLabel="WIPE DATA"
+                onConfirm={confirmReset}
+                onCancel={() => setIsResetModalOpen(false)}
+                isDanger={true}
+            />
+        </div >
     );
 }
