@@ -1,15 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import { useState } from "react";
 import { useGame } from "@/context/GameContext";
 import masterCollection from "@/data/master-collection.json";
 import { Flame, ArrowRight } from "lucide-react";
-import { getRarity } from "@/utils/rarity";
+import { getRarity, RARITY_TIERS, RarityTier } from "@/utils/rarity";
+import LootReveal from "./LootReveal";
 
 // ... existing imports
 
 export default function Forge() {
-    const { inventory, burnItems } = useGame(); // Removed unused bits/addBits for now if not used
+    const { inventory, burnItems, addToInventory } = useGame();
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [forgeResult, setForgeResult] = useState<string[] | null>(null);
 
     // Helper to find category for an item slug
     const findCategory = (slug: string) => {
@@ -48,12 +52,40 @@ export default function Forge() {
     const handleForge = () => {
         if (selectedItems.length !== 10) return;
 
+        // Determine input rarity (assume all same for now, or take average/majority)
+        const inputRarityName = getRarity(selectedItems[0]).name;
+
+        let outputRarity: RarityTier = 'Common';
+        const tierKeys = Object.keys(RARITY_TIERS) as RarityTier[];
+        const currentIndex = tierKeys.indexOf(inputRarityName);
+
+        if (currentIndex < tierKeys.length - 1) {
+            outputRarity = tierKeys[currentIndex + 1];
+        } else {
+            // Max rarity? maybe give multiple of same or just return 'Legendary'
+            outputRarity = 'Legendary';
+        }
+
+        // Find an item of that output rarity
+        // For simplicity, pick a random item from Master Collection that matches the rarity
+        // In a real game, this might use a specific loot table.
+        const allItems = Object.values(masterCollection).flat() as string[];
+        const candidates = allItems.filter(slug => getRarity(slug).name === outputRarity);
+
+        const reward = candidates[Math.floor(Math.random() * candidates.length)] || candidates[0]; // Fallback
+
         // Burn Items
         burnItems(selectedItems);
+        // Add Reward
+        addToInventory([reward]);
 
-        // Clear Selection
+        // Clear Selection & Show Reveal
         setSelectedItems([]);
-        alert("Forge Sequence Complete. (Placeholder: Rewards would be granted here)");
+        setForgeResult([reward]);
+    };
+
+    const handleClaim = () => {
+        setForgeResult(null);
     };
 
     return (
@@ -162,6 +194,12 @@ export default function Forge() {
                     </div>
                 </div>
             </section>
-        </div>
+
+            {
+                forgeResult && (
+                    <LootReveal loot={forgeResult} onClaim={handleClaim} />
+                )
+            }
+        </div >
     );
 }

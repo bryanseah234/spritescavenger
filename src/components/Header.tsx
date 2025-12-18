@@ -73,7 +73,8 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
             </div>
 
             {/* Center: Search Bar */}
-            <div className="flex-1 max-w-md mx-4">
+            {/* Center: Search Bar */}
+            <div className="flex-1 max-w-md mx-4 md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:mx-0 md:w-full">
                 <button
                     onClick={onOpenPalette}
                     className="w-full bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-full h-10 px-4 flex items-center gap-3 group transition-colors"
