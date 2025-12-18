@@ -71,7 +71,7 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
     }
 
     return (
-        <main className="min-h-screen bg-[#222522] pt-20 pb-0 overflow-x-hidden">
+        <main className="h-screen bg-[#222522] pt-20 pb-0 overflow-x-hidden overflow-y-auto">
             <Header
                 onSettingsClick={(t) => handleNav(t)}
                 onOpenPalette={() => setCommandOpen(true)}
