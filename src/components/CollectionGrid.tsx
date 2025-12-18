@@ -9,18 +9,46 @@ export default function CollectionGrid() {
     const { inventory } = useGame();
     const categories = Object.keys(masterCollection);
     const [activeCategory, setActiveCategory] = useState(categories[0]);
+    const [sortMode, setSortMode] = useState<'owned' | 'alpha'>('owned');
 
-    const getCategoryCount = (cat: string) => {
-        // @ts-expect-error JSON key access
-        const items = masterCollection[cat] as string[];
-        const total = items.length;
-        const owned = items.filter(slug => inventory.includes(slug)).length;
-        return { owned, total };
+    const handleCategoryClick = (cat: string) => {
+        if (activeCategory === cat) {
+            // Toggle sort
+            setSortMode(prev => prev === 'owned' ? 'alpha' : 'owned');
+        } else {
+            // New category, default to owned
+            setActiveCategory(cat);
+            setSortMode('owned');
+        }
     };
 
     const formatName = (slug: string) => {
         return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
+
+    const getSortedItems = () => {
+        // @ts-expect-error JSON key access
+        const items = (masterCollection[activeCategory] as string[]) || [];
+
+        // Create a shallow copy to sort
+        const sorted = [...items];
+
+        if (sortMode === 'alpha') {
+            // Already mostly sorted in JSON, but ensure A-Z
+            sorted.sort();
+        } else {
+            // Owned First
+            sorted.sort((a, b) => {
+                const ownedA = inventory.includes(a);
+                const ownedB = inventory.includes(b);
+                if (ownedA === ownedB) return a.localeCompare(b); // Alphabetical tie-break
+                return ownedA ? -1 : 1; // Owned comes first
+            });
+        }
+        return sorted;
+    };
+
+    const sortedItems = getSortedItems();
 
     return (
         <div className="w-full max-w-6xl mx-auto p-4 pb-32 flex flex-col gap-6">
@@ -29,7 +57,7 @@ export default function CollectionGrid() {
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        onClick={() => setActiveCategory(cat)}
+                        onClick={() => handleCategoryClick(cat)}
                         className={`
                             px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all border flex flex-col items-center justify-center gap-1
                             ${activeCategory === cat
@@ -48,9 +76,17 @@ export default function CollectionGrid() {
 
             {/* Grid Area */}
             <div className="bg-slate-900/50 rounded-xl border border-slate-800 p-6 min-h-[50vh]">
+                <div className="flex justify-between items-center mb-4 px-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        {sortMode === 'owned' ? 'Sorted by: Discovered' : 'Sorted by: Alphabetical'}
+                    </span>
+                    <span className="text-[10px] text-slate-600 font-mono">
+                        {activeCategory.toUpperCase()} // {sortedItems.length} ITEMS
+                    </span>
+                </div>
+
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
-                    {/* @ts-expect-error JSON typing */}
-                    {masterCollection[activeCategory]?.map((slug: string) => {
+                    {sortedItems.map((slug: string) => {
                         const isOwned = inventory.includes(slug);
                         const rarity = getRarity(slug);
 

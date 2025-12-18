@@ -1,44 +1,88 @@
 import Image from "next/image";
+import { useState } from "react";
+import { useGame } from "@/context/GameContext";
+import masterCollection from "@/data/master-collection.json";
+import { Flame, ArrowRight } from "lucide-react";
+import { getRarity } from "@/utils/rarity";
 
 // ... existing imports
 
-const handleAutoFill = (rarityName: string) => {
-    // Smart Autofill: Prioritize duplicates, preserve single copies if possible.
+export default function Forge() {
+    const { inventory, burnItems } = useGame(); // Removed unused bits/addBits for now if not used
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
-    // 1. Get all items of rarity
-    const candidates = inventory.filter(slug => getRarity(slug).name === rarityName);
+    // Helper to find category for an item slug
+    const findCategory = (slug: string) => {
+        const entry = Object.entries(masterCollection).find(([_, items]) => (items as string[]).includes(slug));
+        return entry ? entry[0] : 'Misc';
+    };
 
-    // 2. Count frequencies
-    const counts: Record<string, number> = {};
-    candidates.forEach(slug => counts[slug] = (counts[slug] || 0) + 1);
+    const handleAutoFill = (rarityName: string) => {
+        // Smart Autofill: Prioritize duplicates, preserve single copies if possible.
 
-    // 3. Sort candidates: Items with >1 copies come first
-    // We want to burn duplicate instances.
-    // Actually, 'candidates' is a flat list of instances.
-    // We just need to pick 10 instances.
-    // Ideally, we pick distinct items that have duplicates?
-    // No, we pick accurate instances from the inventory array.
+        // 1. Get all items of rarity
+        const candidates = inventory.filter(slug => getRarity(slug).name === rarityName);
 
-    // Let's sort the candidate list such that slugs with high counts are at the start.
-    candidates.sort((a, b) => {
-        const countA = counts[a];
-        const countB = counts[b];
-        if (countA === countB) return 0;
-        return countB - countA; // Higher count first
-    });
+        // 2. Count frequencies
+        const counts: Record<string, number> = {};
+        candidates.forEach(slug => counts[slug] = (counts[slug] || 0) + 1);
 
-    setSelectedItems(candidates.slice(0, 10));
-};
+        // 3. Sort candidates: Items with >1 copies come first
+        // We want to burn duplicate instances.
+        // Actually, 'candidates' is a flat list of instances.
+        // We just need to pick 10 instances.
+        // Ideally, we pick distinct items that have duplicates?
+        // No, we pick accurate instances from the inventory array.
 
-// ... handleForge
+        // Let's sort the candidate list such that slugs with high counts are at the start.
+        candidates.sort((a, b) => {
+            const countA = counts[a];
+            const countB = counts[b];
+            if (countA === countB) return 0;
+            return countB - countA; // Higher count first
+        });
 
-return (
-        // ... structure
+        setSelectedItems(candidates.slice(0, 10));
+    };
+
+    const handleForge = () => {
+        if (selectedItems.length !== 10) return;
+
+        // Burn Items
+        burnItems(selectedItems);
+
+        // Clear Selection
+        setSelectedItems([]);
+        alert("Forge Sequence Complete. (Placeholder: Rewards would be granted here)");
+    };
+
+    return (
+        <div className="w-full max-w-7xl mx-auto px-4 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* Left: Input Selection */}
+            <section className="w-full space-y-4">
+                <div className="flex items-center gap-2 px-2">
+                    <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
+                        <Flame className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-100">Crucible</h2>
+                        <p className="text-xs text-slate-500">Select materials for dissolution.</p>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Input Slots</span>
+                        <span className={`text-xs font-bold ${selectedItems.length === 10 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                            {selectedItems.length} / 10
+                        </span>
+                    </div>
+
                     <div className="grid grid-cols-5 gap-3 mb-6">
                         {selectedItems.map((slug, i) => (
                             <div key={i} className="aspect-square bg-slate-800 rounded-lg border border-slate-700 flex items-center justify-center relative group overflow-hidden" title={slug}>
                                 <Image
-                                    src={`/items/${slug}.png`} // Assuming standard path
+                                    src={`/icons/${encodeURIComponent(findCategory(slug))}/${slug}.png`}
                                     alt={slug}
                                     width={48}
                                     height={48}
@@ -53,7 +97,7 @@ return (
                             </div>
                         ))}
                     </div>
-                    
+
                     <div className="pt-4 border-t border-slate-800">
                         <button
                             onClick={() => handleAutoFill('Common')}
@@ -65,12 +109,11 @@ return (
                             *Auto-fill prioritizes duplicates.
                         </p>
                     </div>
-                </div >
-            </section >
-    // ...
+                </div>
+            </section>
 
-    {/* Right: Output/Action */ }
-    < section className = "w-full space-y-4" >
+            {/* Right: Output/Action */}
+            <section className="w-full space-y-4">
                 <div className="flex items-center gap-2 px-2">
                     <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
                         <ArrowRight className="w-5 h-5" />
@@ -118,7 +161,7 @@ return (
                         </button>
                     </div>
                 </div>
-            </section >
-        </div >
+            </section>
+        </div>
     );
 }

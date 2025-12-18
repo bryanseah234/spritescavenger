@@ -30,8 +30,9 @@ export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, o
 
                 <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">
                     <p>1. Start an Expedition to find data fragments.</p>
-                    <p>2. Collect items and earn Bits.</p>
-                    <p>3. Upgrade your hardware in the Lab.</p>
+                    <p>2. Finding <span className="text-indigo-400">duplicate</span> items earns you <span className="text-amber-400">Bits</span>.</p>
+                    <p>3. Use the <strong className="text-slate-200">Forge</strong> to recycle common items into upgrades.</p>
+                    <p>4. Upgrade your hardware in the Lab to go deeper.</p>
                 </div>
             </div>
 
