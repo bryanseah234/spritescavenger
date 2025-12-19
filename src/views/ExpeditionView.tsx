@@ -64,18 +64,6 @@ export default function ExpeditionView() {
     return (
         <div className="flex flex-col gap-6 w-full h-[calc(100vh-80px)]">
 
-            {/* Mode Toggle (Only visible in IDLE) */}
-            {gameState === 'IDLE' && (
-                <div className="flex justify-end px-4">
-                    <button
-                        onClick={() => setIsAutoMode(!isAutoMode)}
-                        className="text-xs font-mono text-slate-500 hover:text-indigo-400 underline"
-                    >
-                        {isAutoMode ? "SWITCH TO MANUAL CONTROL" : "SWITCH TO AUTO-HUNT"}
-                    </button>
-                </div>
-            )}
-
             {gameState === 'IDLE' && (
                 <div className="flex-1 flex items-center justify-center p-4">
                     <ExpeditionConsole
@@ -84,9 +72,10 @@ export default function ExpeditionView() {
                         totalDuration={AUTO_DURATION}
                         onStart={handleStart}
                         onOpenShop={() => { }}
-                        // Pass auto mode hint
                         customTitle={isAutoMode ? "AUTO-HUNT PROTOCOL" : "EXPEDITION CONSOLE"}
                         customDesc={isAutoMode ? "Drone will automatically scavenge area." : "Manual control required."}
+                        isAutoMode={isAutoMode}
+                        onToggleMode={() => setIsAutoMode(!isAutoMode)}
                     />
                 </div>
             )}
@@ -107,6 +96,8 @@ export default function ExpeditionView() {
                         onOpenShop={() => { }}
                         customTitle="AUTO-HUNT IN PROGRESS"
                         customDesc="Units are scavenging..."
+                        isAutoMode={true}
+                        onToggleMode={() => setIsAutoMode(false)} // Allow canceling
                     />
                 </div>
             )}

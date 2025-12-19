@@ -9,6 +9,8 @@ interface ExpeditionConsoleProps {
     onOpenShop: () => void;
     customTitle?: string;
     customDesc?: string;
+    isAutoMode?: boolean;
+    onToggleMode?: () => void;
 }
 
 export default function ExpeditionConsole({
@@ -19,7 +21,9 @@ export default function ExpeditionConsole({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onOpenShop,
     customTitle,
-    customDesc
+    customDesc,
+    isAutoMode,
+    onToggleMode
 }: ExpeditionConsoleProps) {
     const { playerName } = useGame(); // We can still use this if needed, or override
 
@@ -33,13 +37,24 @@ export default function ExpeditionConsole({
 
             {/* Header */}
             <div className="p-6 border-b border-slate-800 flex justify-between items-start relative z-10">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
-                        {customTitle || "EXPEDITION CONSOLE"}
-                    </h1>
-                    <p className="text-slate-500 font-mono text-xs uppercase tracking-widest mt-1">
-                        {customDesc || `Ref: ${playerName}`}
-                    </p>
+                <div className="flex flex-col items-start gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+                            {customTitle || "EXPEDITION CONSOLE"}
+                        </h1>
+                        <p className="text-slate-500 font-mono text-xs uppercase tracking-widest mt-1">
+                            {customDesc || `Ref: ${playerName}`}
+                        </p>
+                    </div>
+
+                    {onToggleMode && (
+                        <button
+                            onClick={onToggleMode}
+                            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-mono text-indigo-400 rounded-md border border-slate-700 transition-colors uppercase tracking-wider"
+                        >
+                            {isAutoMode ? "Disable Auto-Hunt" : "Enable Auto-Hunt"}
+                        </button>
+                    )}
                 </div>
                 {/* The original instructions block is moved here, assuming it's part of the new header structure */}
                 <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">
