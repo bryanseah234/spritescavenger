@@ -3,6 +3,7 @@ import { useGame } from "@/context/GameContext";
 import ExpeditionConsole from "@/components/ExpeditionConsole";
 import LootReveal from "@/components/LootReveal";
 import ExpeditionGame from "@/components/ExpeditionGame";
+import masterCollection from "@/data/master-collection.json";
 
 export default function ExpeditionView() {
     const { addToInventory, activeBiome } = useGame();
@@ -25,8 +26,15 @@ export default function ExpeditionView() {
         } else if (isAutoActive && autoTimeLeft === 0) {
             // Auto finish
             setIsAutoActive(false);
-            const earnedLoot = ["common_scrap", "common_scrap", "uncommon_chip"]; // Simplified loot logic for auto
-            // In a real app we'd roll using the same logic as the game
+
+            // Generate Real Loot
+            const allSlugs = Object.values(masterCollection).flat() as string[];
+            const earnedLoot: string[] = [];
+            for (let i = 0; i < 3; i++) {
+                const randomSlug = allSlugs[Math.floor(Math.random() * allSlugs.length)];
+                earnedLoot.push(randomSlug);
+            }
+
             handleGameComplete(earnedLoot);
         }
         return () => clearInterval(interval);
