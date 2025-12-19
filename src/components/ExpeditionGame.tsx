@@ -6,6 +6,7 @@ import { getRarity } from "@/utils/rarity";
 
 interface ExpeditionGameProps {
     onComplete: (loot: string[]) => void;
+    biomeId: string;
 }
 
 interface Point {
@@ -21,7 +22,7 @@ interface GameItem {
     floatOffset: number;
 }
 
-export default function ExpeditionGame({ onComplete }: ExpeditionGameProps) {
+export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGameProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
@@ -52,7 +53,11 @@ export default function ExpeditionGame({ onComplete }: ExpeditionGameProps) {
         playerSprite.current = pImg;
 
         const mImg = new Image();
-        mImg.src = "/assets/map_depths.png";
+        // Dynamic Map Loading
+        // IDs: Depths, Pantry, Wilds, Workshop, Mall
+        // Filenames: map_depths.png, map_pantry.png, etc.
+        const mapName = `map_${biomeId.toLowerCase()}`;
+        mImg.src = `/assets/${mapName}.png`;
         mapSprite.current = mImg;
 
         // Spawn Items

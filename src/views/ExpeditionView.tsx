@@ -5,7 +5,7 @@ import LootReveal from "@/components/LootReveal";
 import ExpeditionGame from "@/components/ExpeditionGame";
 
 export default function ExpeditionView() {
-    const { addToInventory } = useGame();
+    const { addToInventory, activeBiome } = useGame();
     const [gameState, setGameState] = useState<'IDLE' | 'PLAYING' | 'REVEAL'>('IDLE');
     const [loot, setLoot] = useState<string[] | null>(null);
 
@@ -40,7 +40,7 @@ export default function ExpeditionView() {
 
             {gameState === 'PLAYING' && (
                 <div className="flex-1 bg-black relative">
-                    <ExpeditionGame onComplete={handleGameComplete} />
+                    <ExpeditionGame onComplete={handleGameComplete} biomeId={activeBiome} />
                 </div>
             )}
 
