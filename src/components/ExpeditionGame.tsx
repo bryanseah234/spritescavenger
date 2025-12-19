@@ -22,9 +22,18 @@ interface GameItem {
     floatOffset: number;
 }
 
+interface Obstacle {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    color: string;
+}
+
 export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGameProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
@@ -37,21 +46,21 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
     // Game Constants
     const SCALE = 3;
-    const PLAYER_SIZE = 32 * SCALE;
-    const WORLD_SIZE = 3000; // Large world
+    const WORLD_SIZE = 3000;
 
     // Physics Constants
     const PLAYER_SPEED = 5 * SCALE;
-    const TOUCH_DIST = 40 * SCALE; // Picking range
+    const PLAYER_RADIUS = 12 * SCALE; // Hitbox radius
+    const TOUCH_DIST = 40 * SCALE;
 
     // State Refs
     const playerPos = useRef<Point>({ x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 });
     const camera = useRef<Point>({ x: 0, y: 0 });
-    const facing = useRef<1 | -1>(1); // 1 = Right, -1 = Left
+    const facing = useRef<1 | -1>(1);
 
     const keys = useRef<Record<string, boolean>>({});
     const items = useRef<GameItem[]>([]);
-    const obstacles = useRef<Point[]>([]);
+    const obstacles = useRef<Obstacle[]>([]);
     const frameId = useRef<number>(0);
 
     // Assets
@@ -74,7 +83,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             const r = data[i];
             const g = data[i + 1];
             const b = data[i + 2];
-            // Black (0,0,0) -> Transparent
+            // Black -> Transparent
             if (r < 10 && g < 10 && b < 10) data[i + 3] = 0;
         }
         ctx.putImageData(imageData, 0, 0);
@@ -98,15 +107,35 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
     // Initialize Game
     useEffect(() => {
-        // Assets
+        // Reset State
+        setIsLoading(true);
+        setGameOver(false);
+        setScore(0);
+
+        // Assets Loading
+        let assetsLoaded = 0;
+        const totalAssets = 2;
+
+        const checkLoaded = () => {
+            assetsLoaded++;
+            if (assetsLoaded === totalAssets) {
+                setIsLoading(false);
+            }
+        };
+
+        // 1. Player Sprite
         const pImg = new Image();
         pImg.src = "/assets/player_sprite.png";
-        pImg.onload = () => { playerSprite.current = processSprite(pImg); };
+        pImg.onload = () => {
+            playerSprite.current = processSprite(pImg);
+            checkLoaded();
+        };
 
+        // 2. Map Sprite
         const mImg = new Image();
-        // Use new clean gravel map
         mImg.src = `/assets/map_gravel.png`;
         mapSprite.current = mImg;
+        mImg.onload = checkLoaded;
 
         // Spawn Items
         const newItems: GameItem[] = [];
@@ -116,8 +145,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             newItems.push({
                 id: i,
                 pos: {
-                    x: Math.random() * WORLD_SIZE,
-                    y: Math.random() * WORLD_SIZE
+                    x: 200 + Math.random() * (WORLD_SIZE - 400),
+                    y: 200 + Math.random() * (WORLD_SIZE - 400)
                 },
                 slug: allSlugs[Math.floor(Math.random() * allSlugs.length)],
                 collected: false,
@@ -126,12 +155,20 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         }
         items.current = newItems;
 
-        // Spawn Obstacles (Rocks)
-        const obs: Point[] = [];
-        for (let i = 0; i < 150; i++) {
+        // Spawn Obstacles (Pillars/Trunks)
+        const obs: Obstacle[] = [];
+        const COLORS = ["#8b5cf6", "#10b981", "#6366f1"]; // Purple, Green, Indigo
+
+        for (let i = 0; i < 60; i++) {
+            // Random rects
+            const w = (20 + Math.random() * 40) * SCALE;
+            const h = (40 + Math.random() * 80) * SCALE;
             obs.push({
                 x: Math.random() * WORLD_SIZE,
-                y: Math.random() * WORLD_SIZE
+                y: Math.random() * WORLD_SIZE,
+                w,
+                h,
+                color: COLORS[Math.floor(Math.random() * COLORS.length)]
             });
         }
         obstacles.current = obs;
@@ -147,8 +184,10 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
         // Loop
         const loop = () => {
-            update();
-            draw();
+            if (!isLoading) {
+                update();
+                draw();
+            }
             frameId.current = requestAnimationFrame(loop);
         };
         frameId.current = requestAnimationFrame(loop);
@@ -159,10 +198,10 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             cancelAnimationFrame(frameId.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [biomeId]);
+    }, [biomeId]); // Restart heavily on biome change is fine
 
     const update = () => {
-        if (gameOver) return;
+        if (gameOver || isLoading) return;
 
         // Movement Input
         let dx = 0;
@@ -186,10 +225,20 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         const nextX = Math.max(0, Math.min(WORLD_SIZE, playerPos.current.x + dx));
         const nextY = Math.max(0, Math.min(WORLD_SIZE, playerPos.current.y + dy));
 
-        // Obstacle Collision
+        // Obstacle Collision (Circle vs AABB)
+        // Player is approx a circle at feet
+        const pRadius = PLAYER_RADIUS;
+
         const hitObstacle = obstacles.current.some(obs => {
-            const dist = Math.hypot(nextX - obs.x, nextY - obs.y);
-            return dist < (30 * SCALE); // Basic circle collision
+            // Find closest point on rect to circle center
+            const closestX = Math.max(obs.x, Math.min(nextX, obs.x + obs.w));
+            const closestY = Math.max(obs.y, Math.min(nextY, obs.y + obs.h)); // use 'y' as top? usually y is top-left in canvas
+
+            const distanceX = nextX - closestX;
+            const distanceY = nextY - closestY;
+            const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+            return distanceSquared < (pRadius * pRadius);
         });
 
         if (!hitObstacle) {
@@ -197,7 +246,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             playerPos.current.y = nextY;
         }
 
-        // Update Camera to center player
+        // Update Camera
         const viewW = dimensionsRef.current.width;
         const viewH = dimensionsRef.current.height;
         camera.current.x = playerPos.current.x - viewW / 2;
@@ -237,47 +286,60 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
         ctx.imageSmoothingEnabled = false;
 
-        // Clear Background (Fill with dark color incase map missing)
+        // Clear Background
         ctx.fillStyle = "#1a1a1a";
         ctx.fillRect(0, 0, viewW, viewH);
 
         ctx.save();
-        // Shift entire world by camera
+        // Shift world
         ctx.translate(-cam.x, -cam.y);
 
-        // Draw Map Pattern (Tiled)
+        // Draw Map Pattern
         if (mapSprite.current && mapSprite.current.complete) {
             const ptrn = ctx.createPattern(mapSprite.current, 'repeat');
             if (ptrn) {
                 ctx.fillStyle = ptrn;
                 ctx.save();
-                // We need to scale the PATTERN, not the rect
                 ctx.scale(SCALE, SCALE);
-                // Inverse scale coords
                 ctx.fillRect(cam.x / SCALE, cam.y / SCALE, viewW / SCALE, viewH / SCALE);
                 ctx.restore();
             }
         }
 
-        // Draw Obstacles
-        ctx.fillStyle = "#2d2d2d"; // Dark grey rocks
-        obstacles.current.forEach(obs => {
-            // Cull off-screen
-            if (obs.x < cam.x - 100 || obs.x > cam.x + viewW + 100 ||
-                obs.y < cam.y - 100 || obs.y > cam.y + viewH + 100) return;
+        // Draw Obstacles (Pillars)
+        // Sort by Y for simple depth sorting!
+        // Actually, player needs to be sorted with them...
+        // For simplicity in top-down mixed 2.5D, we just draw obstacles "behind" if player is "in front", but that's complex.
+        // Let's draw obstacles first, then player (on top). Player might overlap 'base' of pillar which is fine.
 
-            ctx.beginPath();
-            ctx.arc(obs.x, obs.y, 20 * SCALE, 0, Math.PI * 2);
-            ctx.fill();
-            // Highlight
-            ctx.fillStyle = "#3d3d3d";
-            ctx.beginPath();
-            ctx.arc(obs.x - 5, obs.y - 5, 10 * SCALE, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#2d2d2d"; // Reset
+        // Shadow for obstacles
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        obstacles.current.forEach(obs => {
+            // Culling
+            if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW ||
+                obs.y + obs.h < cam.y || obs.y > cam.y + viewH) return;
+
+            ctx.fillRect(obs.x + 10, obs.y + obs.h - 10, obs.w, 10); // Simple floor shadow
         });
 
-        // Draw Items (Shadow + Gem)
+        // Obstacle Bodies
+        obstacles.current.forEach(obs => {
+            if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW || style > cam.y + viewH) return;
+
+            // "3D" Block effect
+            ctx.fillStyle = obs.color;
+            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+
+            // Top highlight
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
+            ctx.fillRect(obs.x, obs.y, obs.w, 4);
+
+            // Side shadow
+            ctx.fillStyle = "rgba(0,0,0,0.2)";
+            ctx.fillRect(obs.x + obs.w - 4, obs.y, 4, obs.h);
+        });
+
+        // Draw Items
         const time = Date.now() / 500;
         items.current.forEach(item => {
             if (item.collected) return;
@@ -295,7 +357,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.shadowBlur = 20;
             ctx.fillStyle = rarity.hex;
 
-            // Diamond Shape
+            // Diamond
             const S = SCALE * 0.8;
             ctx.beginPath();
             ctx.moveTo(item.pos.x, itemY - (15 * S));
@@ -317,27 +379,78 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         ctx.fillStyle = "rgba(0,0,0,0.5)";
         ctx.fill();
 
-        // Sprite Flip Logic
         ctx.scale(facing.current, 1);
 
         if (playerSprite.current) {
-            // Draw centered
             ctx.drawImage(
                 playerSprite.current,
-                -16 * SCALE, // Centered X
-                -16 * SCALE, // Centered Y
+                -16 * SCALE,
+                -16 * SCALE,
                 32 * SCALE, 32 * SCALE
             );
         } else {
-            // Fallback
             ctx.fillStyle = "cyan";
             ctx.fillRect(-10, -20, 20, 40);
         }
-        ctx.restore(); // Restore Translation/Scale
+        ctx.restore();
 
-        ctx.restore(); // Restore Camera
+        ctx.restore(); // End Camera transform
 
-        // Overlay UI (Removed Loot Text per request)
+        // --- HUD / OVERLAYS ---
+
+        // Compass Arrow
+        // Find nearest item
+        let nearestDist = Infinity;
+        let targetItem = null;
+        for (const item of items.current) {
+            if (!item.collected) {
+                const dist = Math.hypot(item.pos.x - playerPos.current.x, item.pos.y - playerPos.current.y);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    targetItem = item;
+                }
+            }
+        }
+
+        if (targetItem) {
+            // Check if off-screen
+            // If item is within camera view, maybe don't show arrow? 
+            // Or always show it to be helpful. User asked for arrow overlay at edge.
+
+            const dx = targetItem.pos.x - playerPos.current.x;
+            const dy = targetItem.pos.y - playerPos.current.y;
+            const angle = Math.atan2(dy, dx);
+
+            const cx = viewW / 2;
+            const cy = viewH / 2;
+
+            // Calculate edge position (Ellipse or Box projection)
+            // Lets do an ellipse slightly smaller than screen
+            const padding = 60;
+            const rx = (viewW / 2) - padding;
+            const ry = (viewH / 2) - padding;
+
+            // Simple projection
+            const px = cx + rx * Math.cos(angle);
+            const py = cy + ry * Math.sin(angle);
+
+            // Draw Arrow
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(10, 0);   // Tip
+            ctx.lineTo(-10, 10); // Back Right
+            ctx.lineTo(-10, -10); // Back Left
+            ctx.closePath();
+
+            ctx.fillStyle = "#10b981"; // Bright Green
+            ctx.shadowColor = "#10b981";
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            ctx.restore();
+        }
     };
 
     // Mobile Control Adapters
@@ -356,6 +469,15 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
     return (
         <div ref={containerRef} className="relative w-full h-full flex items-center justify-center bg-black overflow-hidden select-none">
+            {isLoading && (
+                <div className="absolute inset-0 bg-black z-50 flex items-center justify-center flex-col gap-4">
+                    <div className="text-emerald-500 font-mono text-xl animate-pulse">DEPLOYING DRONE...</div>
+                    <div className="w-32 h-1 bg-green-900 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 animate-[width_1s_ease-out_infinite]" style={{ width: '50%' }} />
+                    </div>
+                </div>
+            )}
+
             <canvas
                 ref={canvasRef}
                 width={dimensions.width}
@@ -384,7 +506,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
                 >▶</button>
             </div>
             <div className="absolute top-4 right-4 text-xs text-slate-500 font-mono hidden md:block opacity-50">
-                WASD | Explore
+                WASD | Follow Arrow
             </div>
         </div>
     );
