@@ -28,6 +28,12 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+    const dimensionsRef = useRef(dimensions); // Ref to track dimensions in loop
+
+    // Update Ref when State changes
+    useEffect(() => {
+        dimensionsRef.current = dimensions;
+    }, [dimensions]);
 
     // Game Constants
     const SCALE = 3; // Scale up for visibility
@@ -108,8 +114,9 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         const allSlugs = Object.values(masterCollection).flat() as string[];
 
         // Spawn based on current dimensions or default
-        const w = dimensions.width || 800;
-        const h = dimensions.height || 600;
+        // Use ref for immediate access, though strictly items init matters less since it's one-time
+        const w = dimensionsRef.current.width || 800;
+        const h = dimensionsRef.current.height || 600;
 
         for (let i = 0; i < 5; i++) {
             const randomSlug = allSlugs[Math.floor(Math.random() * allSlugs.length)];
@@ -147,10 +154,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             cancelAnimationFrame(frameId.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [biomeId, dimensions.width, dimensions.height]); // Restart if resized significantly? Maybe debounced. 
-    // Actual implementation might want to just clamp player pos instead of respawning items on resize. 
-    // For simplicity, we restart on drastic resize or we just let items float out of bounds.
-    // Let's refine Update logic to use current dimensions ref.
+    }, [biomeId]); // Only restart on biome change. Dimensions are tracked via ref.
 
     const update = () => {
         if (gameOver) return;
@@ -168,8 +172,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             dy *= 0.707;
         }
 
-        const W = dimensions.width;
-        const H = dimensions.height;
+        const W = dimensionsRef.current.width;
+        const H = dimensionsRef.current.height;
 
         playerPos.current.x = Math.max(PLAYER_SIZE / 2, Math.min(W - PLAYER_SIZE / 2, playerPos.current.x + dx));
         playerPos.current.y = Math.max(PLAYER_SIZE / 2, Math.min(H - PLAYER_SIZE / 2, playerPos.current.y + dy));
@@ -207,7 +211,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
         // Clear
         ctx.fillStyle = "#111";
-        ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+        ctx.fillRect(0, 0, dimensionsRef.current.width, dimensionsRef.current.height);
 
         // Draw Map Pattern (Scaled)
         if (mapSprite.current && mapSprite.current.complete) {
@@ -218,7 +222,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             if (pattern) {
                 ctx.fillStyle = pattern;
                 // Fill using coordinates relative to scale
-                ctx.fillRect(0, 0, dimensions.width / SCALE, dimensions.height / SCALE);
+                ctx.fillRect(0, 0, dimensionsRef.current.width / SCALE, dimensionsRef.current.height / SCALE);
             }
             ctx.restore();
         }
