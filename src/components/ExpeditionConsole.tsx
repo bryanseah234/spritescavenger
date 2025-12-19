@@ -7,24 +7,41 @@ interface ExpeditionConsoleProps {
     totalDuration: number;
     onStart: () => void;
     onOpenShop: () => void;
+    customTitle?: string;
+    customDesc?: string;
 }
 
-export default function ExpeditionConsole({ isActive, timeLeft, totalDuration, onStart, onOpenShop }: ExpeditionConsoleProps) {
-    const { playerName } = useGame();
-    const progress = isActive
-        ? ((totalDuration - timeLeft) / totalDuration) * 100
-        : 0;
+export default function ExpeditionConsole({
+    isActive,
+    timeLeft,
+    totalDuration,
+    onStart,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onOpenShop,
+    customTitle,
+    customDesc
+}: ExpeditionConsoleProps) {
+    const { playerName } = useGame(); // We can still use this if needed, or override
+
+    // Calculate progress percentage
+    const progress = Math.min(100, Math.max(0, ((totalDuration - timeLeft) / totalDuration) * 100));
 
     return (
-        <div className="w-full max-w-md mx-auto p-4 flex flex-col gap-6">
-            {/* Instructions & Greeting */}
-            <div className="text-center space-y-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight uppercase">
-                        Welcome back, {playerName}
-                    </h1>
-                </div>
+        <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            {/* Scanlines Effect */}
+            <div className="absolute inset-0 pointer-events-none bg-[url('/assets/scanlines.png')] opacity-10 mix-blend-overlay z-20"></div>
 
+            {/* Header */}
+            <div className="p-6 border-b border-slate-800 flex justify-between items-start relative z-10">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-100 tracking-tight">
+                        {customTitle || "EXPEDITION CONSOLE"}
+                    </h1>
+                    <p className="text-slate-500 font-mono text-xs uppercase tracking-widest mt-1">
+                        {customDesc || `Ref: ${playerName}`}
+                    </p>
+                </div>
+                {/* The original instructions block is moved here, assuming it's part of the new header structure */}
                 <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">
                     <p>1. Start an Expedition to find data fragments.</p>
                     <p>2. Finding <span className="text-indigo-400">duplicate</span> items earns you <span className="text-amber-400">Bits</span>.</p>
