@@ -28,33 +28,37 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-    const dimensionsRef = useRef(dimensions); // Ref to track dimensions in loop
+    const dimensionsRef = useRef(dimensions);
 
-    // Update Ref when State changes
+    // Update Ref
     useEffect(() => {
         dimensionsRef.current = dimensions;
     }, [dimensions]);
 
     // Game Constants
-    const SCALE = 3; // Scale up for visibility
-    const TILE_SIZE = 32 * SCALE;
+    const SCALE = 3;
     const PLAYER_SIZE = 32 * SCALE;
+    const WORLD_SIZE = 3000; // Large world
 
     // Physics Constants
-    const PLAYER_SPEED = 4 * SCALE; // Speed needs to scale too
-    const TOUCH_DIST = 30 * SCALE; // Hitbox scales
+    const PLAYER_SPEED = 5 * SCALE;
+    const TOUCH_DIST = 40 * SCALE; // Picking range
 
     // State Refs
-    const playerPos = useRef<Point>({ x: 400, y: 300 });
+    const playerPos = useRef<Point>({ x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 });
+    const camera = useRef<Point>({ x: 0, y: 0 });
+    const facing = useRef<1 | -1>(1); // 1 = Right, -1 = Left
+
     const keys = useRef<Record<string, boolean>>({});
     const items = useRef<GameItem[]>([]);
+    const obstacles = useRef<Point[]>([]);
     const frameId = useRef<number>(0);
 
     // Assets
-    const playerSprite = useRef<HTMLCanvasElement | null>(null); // Processed sprite is a canvas
+    const playerSprite = useRef<HTMLCanvasElement | null>(null);
     const mapSprite = useRef<HTMLImageElement | null>(null);
 
-    // Helper: Remove Black Background (Chroma Key)
+    // Helper: Chroma Key
     const processSprite = (img: HTMLImageElement): HTMLCanvasElement => {
         const c = document.createElement('canvas');
         c.width = img.width;
@@ -70,10 +74,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             const r = data[i];
             const g = data[i + 1];
             const b = data[i + 2];
-            // If pixel is black (allowing slight noise), make transparent
-            if (r < 10 && g < 10 && b < 10) {
-                data[i + 3] = 0;
-            }
+            // Black (0,0,0) -> Transparent
+            if (r < 10 && g < 10 && b < 10) data[i + 3] = 0;
         }
         ctx.putImageData(imageData, 0, 0);
         return c;
@@ -89,7 +91,6 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
                 });
             }
         };
-
         updateSize();
         window.addEventListener('resize', updateSize);
         return () => window.removeEventListener('resize', updateSize);
@@ -97,42 +98,46 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
     // Initialize Game
     useEffect(() => {
-        // Load Assets
+        // Assets
         const pImg = new Image();
         pImg.src = "/assets/player_sprite.png";
-        pImg.onload = () => {
-            playerSprite.current = processSprite(pImg);
-        };
+        pImg.onload = () => { playerSprite.current = processSprite(pImg); };
 
         const mImg = new Image();
-        const mapName = `map_${biomeId.toLowerCase()}`;
-        mImg.src = `/assets/${mapName}.png`;
+        // Use new clean gravel map
+        mImg.src = `/assets/map_gravel.png`;
         mapSprite.current = mImg;
 
-        // Spawn Items logic...
+        // Spawn Items
         const newItems: GameItem[] = [];
         const allSlugs = Object.values(masterCollection).flat() as string[];
 
-        // Spawn based on current dimensions or default
-        // Use ref for immediate access, though strictly items init matters less since it's one-time
-        const w = dimensionsRef.current.width || 800;
-        const h = dimensionsRef.current.height || 600;
-
         for (let i = 0; i < 5; i++) {
-            const randomSlug = allSlugs[Math.floor(Math.random() * allSlugs.length)];
             newItems.push({
                 id: i,
                 pos: {
-                    x: 50 + Math.random() * (w - 100),
-                    y: 50 + Math.random() * (h - 100)
+                    x: Math.random() * WORLD_SIZE,
+                    y: Math.random() * WORLD_SIZE
                 },
-                slug: randomSlug,
+                slug: allSlugs[Math.floor(Math.random() * allSlugs.length)],
                 collected: false,
                 floatOffset: Math.random() * Math.PI * 2
             });
         }
         items.current = newItems;
-        playerPos.current = { x: w / 2, y: h / 2 }; // Center player
+
+        // Spawn Obstacles (Rocks)
+        const obs: Point[] = [];
+        for (let i = 0; i < 150; i++) {
+            obs.push({
+                x: Math.random() * WORLD_SIZE,
+                y: Math.random() * WORLD_SIZE
+            });
+        }
+        obstacles.current = obs;
+
+        // Reset Player
+        playerPos.current = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
 
         // Inputs
         const handleDown = (e: KeyboardEvent) => keys.current[e.code] = true;
@@ -140,7 +145,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         window.addEventListener("keydown", handleDown);
         window.addEventListener("keyup", handleUp);
 
-        // Game Loop
+        // Loop
         const loop = () => {
             update();
             draw();
@@ -154,12 +159,12 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             cancelAnimationFrame(frameId.current);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [biomeId]); // Only restart on biome change. Dimensions are tracked via ref.
+    }, [biomeId]);
 
     const update = () => {
         if (gameOver) return;
 
-        // Movement
+        // Movement Input
         let dx = 0;
         let dy = 0;
         if (keys.current['KeyW'] || keys.current['ArrowUp']) dy -= PLAYER_SPEED;
@@ -167,18 +172,38 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         if (keys.current['KeyA'] || keys.current['ArrowLeft']) dx -= PLAYER_SPEED;
         if (keys.current['KeyD'] || keys.current['ArrowRight']) dx += PLAYER_SPEED;
 
+        // Normalize
         if (dx !== 0 && dy !== 0) {
             dx *= 0.707;
             dy *= 0.707;
         }
 
-        const W = dimensionsRef.current.width;
-        const H = dimensionsRef.current.height;
+        // Facing Direction (Flip)
+        if (dx > 0) facing.current = 1;
+        if (dx < 0) facing.current = -1;
 
-        playerPos.current.x = Math.max(PLAYER_SIZE / 2, Math.min(W - PLAYER_SIZE / 2, playerPos.current.x + dx));
-        playerPos.current.y = Math.max(PLAYER_SIZE / 2, Math.min(H - PLAYER_SIZE / 2, playerPos.current.y + dy));
+        // Proposed New Position
+        const nextX = Math.max(0, Math.min(WORLD_SIZE, playerPos.current.x + dx));
+        const nextY = Math.max(0, Math.min(WORLD_SIZE, playerPos.current.y + dy));
 
-        // Collision
+        // Obstacle Collision
+        const hitObstacle = obstacles.current.some(obs => {
+            const dist = Math.hypot(nextX - obs.x, nextY - obs.y);
+            return dist < (30 * SCALE); // Basic circle collision
+        });
+
+        if (!hitObstacle) {
+            playerPos.current.x = nextX;
+            playerPos.current.y = nextY;
+        }
+
+        // Update Camera to center player
+        const viewW = dimensionsRef.current.width;
+        const viewH = dimensionsRef.current.height;
+        camera.current.x = playerPos.current.x - viewW / 2;
+        camera.current.y = playerPos.current.y - viewH / 2;
+
+        // Item Collection
         let collectedCount = 0;
         items.current.forEach(item => {
             if (item.collected) {
@@ -206,90 +231,122 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Disable smoothing for pixel art
+        const viewW = dimensionsRef.current.width;
+        const viewH = dimensionsRef.current.height;
+        const cam = camera.current;
+
         ctx.imageSmoothingEnabled = false;
 
-        // Clear
-        ctx.fillStyle = "#111";
-        ctx.fillRect(0, 0, dimensionsRef.current.width, dimensionsRef.current.height);
+        // Clear Background (Fill with dark color incase map missing)
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(0, 0, viewW, viewH);
 
-        // Draw Map Pattern (Scaled)
+        ctx.save();
+        // Shift entire world by camera
+        ctx.translate(-cam.x, -cam.y);
+
+        // Draw Map Pattern (Tiled)
         if (mapSprite.current && mapSprite.current.complete) {
-            // To scale pattern, we need a scaled version or transform
-            ctx.save();
-            ctx.scale(SCALE, SCALE);
-            const pattern = ctx.createPattern(mapSprite.current, 'repeat');
-            if (pattern) {
-                ctx.fillStyle = pattern;
-                // Fill using coordinates relative to scale
-                ctx.fillRect(0, 0, dimensionsRef.current.width / SCALE, dimensionsRef.current.height / SCALE);
+            const ptrn = ctx.createPattern(mapSprite.current, 'repeat');
+            if (ptrn) {
+                ctx.fillStyle = ptrn;
+                ctx.save();
+                // We need to scale the PATTERN, not the rect
+                ctx.scale(SCALE, SCALE);
+                // Inverse scale coords
+                ctx.fillRect(cam.x / SCALE, cam.y / SCALE, viewW / SCALE, viewH / SCALE);
+                ctx.restore();
             }
-            ctx.restore();
         }
 
-        // Draw Player (Scaled)
-        // Shadow
-        ctx.beginPath();
-        ctx.ellipse(playerPos.current.x, playerPos.current.y + (12 * SCALE), 12 * SCALE, 6 * SCALE, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
-        ctx.fill();
+        // Draw Obstacles
+        ctx.fillStyle = "#2d2d2d"; // Dark grey rocks
+        obstacles.current.forEach(obs => {
+            // Cull off-screen
+            if (obs.x < cam.x - 100 || obs.x > cam.x + viewW + 100 ||
+                obs.y < cam.y - 100 || obs.y > cam.y + viewH + 100) return;
 
-        if (playerSprite.current) {
-            // Draw centered
-            ctx.drawImage(
-                playerSprite.current,
-                playerPos.current.x - (16 * SCALE),
-                playerPos.current.y - (16 * SCALE),
-                32 * SCALE, 32 * SCALE
-            );
-        } else {
-            ctx.fillStyle = "cyan";
-            ctx.fillRect(playerPos.current.x - 10, playerPos.current.y - 10, 20, 20);
-        }
+            ctx.beginPath();
+            ctx.arc(obs.x, obs.y, 20 * SCALE, 0, Math.PI * 2);
+            ctx.fill();
+            // Highlight
+            ctx.fillStyle = "#3d3d3d";
+            ctx.beginPath();
+            ctx.arc(obs.x - 5, obs.y - 5, 10 * SCALE, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#2d2d2d"; // Reset
+        });
 
-        // Draw Items (Scaled)
+        // Draw Items (Shadow + Gem)
         const time = Date.now() / 500;
         items.current.forEach(item => {
             if (item.collected) return;
+            // Culling
+            if (item.pos.x < cam.x - 100 || item.pos.x > cam.x + viewW + 100 ||
+                item.pos.y < cam.y - 100 || item.pos.y > cam.y + viewH + 100) return;
 
-            const bob = Math.sin(time + item.floatOffset) * 5;
+            const bob = Math.sin(time + item.floatOffset) * 10;
             const itemY = item.pos.y + bob;
-
             const rarity = getRarity(item.slug);
+
+            // Glow
             ctx.save();
             ctx.shadowColor = rarity.hex;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.fillStyle = rarity.hex;
 
-            // Gem Size scaled
-            const S = SCALE;
+            // Diamond Shape
+            const S = SCALE * 0.8;
             ctx.beginPath();
-            ctx.moveTo(item.pos.x, itemY - (10 * S));
-            ctx.lineTo(item.pos.x + (8 * S), itemY);
-            ctx.lineTo(item.pos.x, itemY + (10 * S));
-            ctx.lineTo(item.pos.x - (8 * S), itemY);
+            ctx.moveTo(item.pos.x, itemY - (15 * S));
+            ctx.lineTo(item.pos.x + (12 * S), itemY);
+            ctx.lineTo(item.pos.x, itemY + (15 * S));
+            ctx.lineTo(item.pos.x - (12 * S), itemY);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
         });
 
-        // UI
-        ctx.font = `bold ${20 * SCALE}px monospace`;
-        ctx.fillStyle = "white";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 4;
-        ctx.strokeText(`LOOT: ${score}/5`, 20, 30 * SCALE);
-        ctx.fillText(`LOOT: ${score}/5`, 20, 30 * SCALE);
+        // Draw Player
+        ctx.save();
+        ctx.translate(playerPos.current.x, playerPos.current.y);
+
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 12 * SCALE, 12 * SCALE, 6 * SCALE, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fill();
+
+        // Sprite Flip Logic
+        ctx.scale(facing.current, 1);
+
+        if (playerSprite.current) {
+            // Draw centered
+            ctx.drawImage(
+                playerSprite.current,
+                -16 * SCALE, // Centered X
+                -16 * SCALE, // Centered Y
+                32 * SCALE, 32 * SCALE
+            );
+        } else {
+            // Fallback
+            ctx.fillStyle = "cyan";
+            ctx.fillRect(-10, -20, 20, 40);
+        }
+        ctx.restore(); // Restore Translation/Scale
+
+        ctx.restore(); // Restore Camera
+
+        // Overlay UI (Removed Loot Text per request)
     };
 
-    // Mobile Controls Handlers (Simple)
+    // Mobile Control Adapters
     const handleTouchMove = (dx: number, dy: number) => {
         keys.current['KeyW'] = dy < 0;
         keys.current['KeyS'] = dy > 0;
         keys.current['KeyA'] = dx < 0;
         keys.current['KeyD'] = dx > 0;
     };
-
     const handleTouchEnd = () => {
         keys.current['KeyW'] = false;
         keys.current['KeyS'] = false;
@@ -305,7 +362,6 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
                 height={dimensions.height}
                 className="block"
             />
-
             {/* Mobile Controls Overlay */}
             <div className="absolute bottom-10 left-10 md:hidden grid grid-cols-3 gap-2 opacity-80 z-10">
                 <div />
@@ -327,9 +383,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
                     onTouchStart={() => handleTouchMove(1, 0)} onTouchEnd={handleTouchEnd}
                 >▶</button>
             </div>
-
-            <div className="absolute top-4 right-4 text-xs text-slate-500 font-mono hidden md:block">
-                WASD to Move
+            <div className="absolute top-4 right-4 text-xs text-slate-500 font-mono hidden md:block opacity-50">
+                WASD | Explore
             </div>
         </div>
     );
