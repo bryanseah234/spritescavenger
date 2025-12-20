@@ -34,7 +34,6 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const dimensionsRef = useRef(dimensions);
@@ -65,7 +64,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
     // Assets
     const playerSprite = useRef<HTMLCanvasElement | null>(null);
-    const mapSprite = useRef<HTMLImageElement | null>(null);
+    // Remove raw map image ref, strictly use pattern
+    const mapPattern = useRef<CanvasPattern | null>(null);
 
     // Helper: Chroma Key
     const processSprite = (img: HTMLImageElement): HTMLCanvasElement => {
@@ -110,7 +110,6 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         // Reset State
         setIsLoading(true);
         setGameOver(false);
-        setScore(0);
 
         // Assets Loading
         let assetsLoaded = 0;
@@ -131,11 +130,19 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             checkLoaded();
         };
 
-        // 2. Map Sprite
+        // 2. Map Sprite -> Pattern
         const mImg = new Image();
         mImg.src = `/assets/map_gravel.png`;
-        mapSprite.current = mImg;
-        mImg.onload = checkLoaded;
+        mImg.onload = () => {
+            // Create pattern once here
+            const tempCanvas = document.createElement('canvas');
+            const tCtx = tempCanvas.getContext('2d');
+            if (tCtx) {
+                const pattern = tCtx.createPattern(mImg, 'repeat');
+                mapPattern.current = pattern;
+            }
+            checkLoaded();
+        };
 
         // Spawn Items
         const newItems: GameItem[] = [];
@@ -262,7 +269,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             const dist = Math.hypot(playerPos.current.x - item.pos.x, playerPos.current.y - item.pos.y);
             if (dist < TOUCH_DIST) {
                 item.collected = true;
-                setScore(prev => prev + 1);
+                // Score removed (unused)
             }
         });
 
@@ -294,23 +301,16 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         // Shift world
         ctx.translate(-cam.x, -cam.y);
 
-        // Draw Map Pattern
-        if (mapSprite.current && mapSprite.current.complete) {
-            const ptrn = ctx.createPattern(mapSprite.current, 'repeat');
-            if (ptrn) {
-                ctx.fillStyle = ptrn;
-                ctx.save();
-                ctx.scale(SCALE, SCALE);
-                ctx.fillRect(cam.x / SCALE, cam.y / SCALE, viewW / SCALE, viewH / SCALE);
-                ctx.restore();
-            }
+        // Draw Map Pattern (Cached)
+        if (mapPattern.current) {
+            ctx.fillStyle = mapPattern.current;
+            ctx.save();
+            ctx.scale(SCALE, SCALE);
+            ctx.fillRect(cam.x / SCALE, cam.y / SCALE, viewW / SCALE, viewH / SCALE);
+            ctx.restore();
         }
 
-        // Draw Obstacles (Pillars)
-        // Sort by Y for simple depth sorting!
-        // Actually, player needs to be sorted with them...
-        // For simplicity in top-down mixed 2.5D, we just draw obstacles "behind" if player is "in front", but that's complex.
-        // Let's draw obstacles first, then player (on top). Player might overlap 'base' of pillar which is fine.
+        // Draw Obstacles (Pillars) - Simple Z-sorting? No, just layer order.
 
         // Shadow for obstacles
         ctx.fillStyle = "rgba(0,0,0,0.5)";
@@ -324,7 +324,8 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
 
         // Obstacle Bodies
         obstacles.current.forEach(obs => {
-            if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW || style > cam.y + viewH) return;
+            if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW ||
+                obs.y + obs.h < cam.y || obs.y > cam.y + viewH) return;
 
             // "3D" Block effect
             ctx.fillStyle = obs.color;
@@ -351,13 +352,21 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             const itemY = item.pos.y + bob;
             const rarity = getRarity(item.slug);
 
-            // Glow
+            // Optimized Glow (Radial Gradient)
             ctx.save();
-            ctx.shadowColor = rarity.hex;
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = rarity.hex;
+            const g = ctx.createRadialGradient(item.pos.x, itemY, 0, item.pos.x, itemY, 40);
+            g.addColorStop(0, rarity.hex);
+            g.addColorStop(1, "transparent");
+            ctx.fillStyle = g;
+            ctx.globalAlpha = 0.6; // Soft glow opacity
+            ctx.beginPath();
+            ctx.arc(item.pos.x, itemY, 40, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+            ctx.restore();
 
             // Diamond
+            ctx.fillStyle = rarity.hex;
             const S = SCALE * 0.8;
             ctx.beginPath();
             ctx.moveTo(item.pos.x, itemY - (15 * S));
@@ -366,7 +375,6 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.lineTo(item.pos.x - (12 * S), itemY);
             ctx.closePath();
             ctx.fill();
-            ctx.restore();
         });
 
         // Draw Player

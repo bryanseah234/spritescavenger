@@ -17,7 +17,7 @@ export default function Forge() {
 
     // Helper to find category for an item slug
     const findCategory = (slug: string) => {
-        const entry = Object.entries(masterCollection).find(([_, items]) => (items as string[]).includes(slug));
+        const entry = Object.entries(masterCollection).find(([, items]) => (items as string[]).includes(slug));
         return entry ? entry[0] : 'Misc';
     };
 
@@ -156,7 +156,7 @@ export default function Forge() {
                     </div>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px]">
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center min-h-75">
                     <div className="relative mb-8 group cursor-help">
                         {/* Glow Effect */}
                         <div className={`absolute inset-0 bg-orange-500/20 blur-3xl rounded-full transition-opacity duration-500 ${selectedItems.length === 10 ? 'opacity-100' : 'opacity-0'}`} />

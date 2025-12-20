@@ -107,7 +107,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh] px-4">
+        <div className="fixed inset-0 z-100 flex items-start justify-center pt-[20vh] px-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
             <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-2xl relative flex flex-col">
@@ -129,7 +129,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
                     </div>
                 </div>
 
-                <div className="max-h-[300px] overflow-y-auto p-2">
+                <div className="max-h-75 overflow-y-auto p-2">
                     {results.length === 0 ? (
                         <div className="p-4 text-center text-slate-500 text-xs font-mono">No results found.</div>
                     ) : (
