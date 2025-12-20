@@ -38,10 +38,22 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const dimensionsRef = useRef(dimensions);
 
-    // Update Ref
+    // Refs to avoid stale closures in game loop
+    const isLoadingRef = useRef(true);
+    const gameOverRef = useRef(false);
+
+    // Keep refs in sync with state (for game loop to read current values)
     useEffect(() => {
         dimensionsRef.current = dimensions;
     }, [dimensions]);
+
+    useEffect(() => {
+        isLoadingRef.current = isLoading;
+    }, [isLoading]);
+
+    useEffect(() => {
+        gameOverRef.current = gameOver;
+    }, [gameOver]);
 
     // Game Constants
     const SCALE = 3;
@@ -189,9 +201,9 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         window.addEventListener("keydown", handleDown);
         window.addEventListener("keyup", handleUp);
 
-        // Loop
+        // Loop - use refs to get current state values (avoids stale closures)
         const loop = () => {
-            if (!isLoading) {
+            if (!isLoadingRef.current) {
                 update();
                 draw();
             }
@@ -208,7 +220,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     }, [biomeId]); // Restart heavily on biome change is fine
 
     const update = () => {
-        if (gameOver || isLoading) return;
+        if (gameOverRef.current || isLoadingRef.current) return;
 
         // Movement Input
         let dx = 0;
@@ -310,24 +322,18 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.restore();
         }
 
-        // Draw Obstacles (Pillars) - Simple Z-sorting? No, just layer order.
-
-        // Shadow for obstacles
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
-        obstacles.current.forEach(obs => {
-            // Culling
+        // Draw Obstacles (Pillars) - Single pass for performance
+        for (let i = 0; i < obstacles.current.length; i++) {
+            const obs = obstacles.current[i];
+            // Culling - skip if off-screen
             if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW ||
-                obs.y + obs.h < cam.y || obs.y > cam.y + viewH) return;
+                obs.y + obs.h < cam.y || obs.y > cam.y + viewH) continue;
 
-            ctx.fillRect(obs.x + 10, obs.y + obs.h - 10, obs.w, 10); // Simple floor shadow
-        });
+            // Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(obs.x + 10, obs.y + obs.h - 10, obs.w, 10);
 
-        // Obstacle Bodies
-        obstacles.current.forEach(obs => {
-            if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW ||
-                obs.y + obs.h < cam.y || obs.y > cam.y + viewH) return;
-
-            // "3D" Block effect
+            // Body
             ctx.fillStyle = obs.color;
             ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
@@ -338,32 +344,28 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             // Side shadow
             ctx.fillStyle = "rgba(0,0,0,0.2)";
             ctx.fillRect(obs.x + obs.w - 4, obs.y, 4, obs.h);
-        });
+        }
 
-        // Draw Items
+        // Draw Items - Optimized: simple circle glow instead of radial gradient
         const time = Date.now() / 500;
-        items.current.forEach(item => {
-            if (item.collected) return;
+        for (let i = 0; i < items.current.length; i++) {
+            const item = items.current[i];
+            if (item.collected) continue;
             // Culling
             if (item.pos.x < cam.x - 100 || item.pos.x > cam.x + viewW + 100 ||
-                item.pos.y < cam.y - 100 || item.pos.y > cam.y + viewH + 100) return;
+                item.pos.y < cam.y - 100 || item.pos.y > cam.y + viewH + 100) continue;
 
             const bob = Math.sin(time + item.floatOffset) * 10;
             const itemY = item.pos.y + bob;
             const rarity = getRarity(item.slug);
 
-            // Optimized Glow (Radial Gradient)
-            ctx.save();
-            const g = ctx.createRadialGradient(item.pos.x, itemY, 0, item.pos.x, itemY, 40);
-            g.addColorStop(0, rarity.hex);
-            g.addColorStop(1, "transparent");
-            ctx.fillStyle = g;
-            ctx.globalAlpha = 0.6; // Soft glow opacity
+            // Simple glow circle (faster than radial gradient per frame)
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = rarity.hex;
             ctx.beginPath();
-            ctx.arc(item.pos.x, itemY, 40, 0, Math.PI * 2);
+            ctx.arc(item.pos.x, itemY, 45, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1.0;
-            ctx.restore();
 
             // Diamond
             ctx.fillStyle = rarity.hex;
@@ -375,7 +377,7 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.lineTo(item.pos.x - (12 * S), itemY);
             ctx.closePath();
             ctx.fill();
-        });
+        }
 
         // Draw Player
         ctx.save();
