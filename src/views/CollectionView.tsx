@@ -6,7 +6,7 @@ export default function CollectionView() {
         <div className="w-full px-4 flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-4 py-8">
-                <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-400">
+                <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">
                     <Database className="w-8 h-8" />
                 </div>
                 <div>
@@ -19,3 +19,4 @@ export default function CollectionView() {
         </div>
     );
 }
+

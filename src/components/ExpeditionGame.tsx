@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import masterCollection from "@/data/master-collection.json";
-import { getRarity } from "@/utils/rarity";
 
 interface ExpeditionGameProps {
     onComplete: (loot: string[]) => void;
@@ -20,6 +19,7 @@ interface GameItem {
     slug: string;
     collected: boolean;
     floatOffset: number;
+    color: string; // Cached color to avoid per-frame allocation
 }
 
 interface Obstacle {
@@ -156,41 +156,60 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             checkLoaded();
         };
 
-        // Spawn Items
-        const newItems: GameItem[] = [];
-        const allSlugs = Object.values(masterCollection).flat() as string[];
-
-        for (let i = 0; i < 5; i++) {
-            newItems.push({
-                id: i,
-                pos: {
-                    x: 200 + Math.random() * (WORLD_SIZE - 400),
-                    y: 200 + Math.random() * (WORLD_SIZE - 400)
-                },
-                slug: allSlugs[Math.floor(Math.random() * allSlugs.length)],
-                collected: false,
-                floatOffset: Math.random() * Math.PI * 2
-            });
-        }
-        items.current = newItems;
-
-        // Spawn Obstacles (Pillars/Trunks)
+        // Spawn Obstacles (Rocks) - MUST be before items so collision check works
         const obs: Obstacle[] = [];
-        const COLORS = ["#8b5cf6", "#10b981", "#6366f1"]; // Purple, Green, Indigo
 
-        for (let i = 0; i < 60; i++) {
-            // Random rects
-            const w = (20 + Math.random() * 40) * SCALE;
-            const h = (40 + Math.random() * 80) * SCALE;
+        for (let i = 0; i < 80; i++) {
+            // Smaller, more natural rock sizes
+            const baseSize = 15 + Math.random() * 25;
+            const w = baseSize * SCALE;
+            const h = (baseSize * 0.6 + Math.random() * 10) * SCALE;
             obs.push({
                 x: Math.random() * WORLD_SIZE,
                 y: Math.random() * WORLD_SIZE,
                 w,
                 h,
-                color: COLORS[Math.floor(Math.random() * COLORS.length)]
+                color: '#6b5344' // Base brown color
             });
         }
         obstacles.current = obs;
+
+        // Spawn Items (avoiding obstacles)
+        const newItems: GameItem[] = [];
+        const allSlugs = Object.values(masterCollection).flat() as string[];
+        const LOOT_COLORS = ['#10b981', '#8b5cf6', '#3b82f6']; // Green, Purple, Blue
+
+        // Helper to check if position overlaps with any obstacle
+        const overlapsObstacle = (x: number, y: number, buffer: number) => {
+            for (const o of obs) {
+                if (x > o.x - buffer && x < o.x + o.w + buffer &&
+                    y > o.y - buffer && y < o.y + o.h + buffer) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        for (let i = 0; i < 5; i++) {
+            let x: number, y: number;
+            let attempts = 0;
+            // Try to find a position that doesn't overlap obstacles
+            do {
+                x = 200 + Math.random() * (WORLD_SIZE - 400);
+                y = 200 + Math.random() * (WORLD_SIZE - 400);
+                attempts++;
+            } while (overlapsObstacle(x, y, 60) && attempts < 50);
+
+            newItems.push({
+                id: i,
+                pos: { x, y },
+                slug: allSlugs[Math.floor(Math.random() * allSlugs.length)],
+                collected: false,
+                floatOffset: Math.random() * Math.PI * 2,
+                color: LOOT_COLORS[Math.floor(Math.random() * LOOT_COLORS.length)]
+            });
+        }
+        items.current = newItems;
 
         // Reset Player
         playerPos.current = { x: WORLD_SIZE / 2, y: WORLD_SIZE / 2 };
@@ -322,32 +341,75 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.restore();
         }
 
-        // Draw Obstacles (Pillars) - Single pass for performance
+        // Draw Obstacles (Rocks) - Pixel art style
         for (let i = 0; i < obstacles.current.length; i++) {
             const obs = obstacles.current[i];
             // Culling - skip if off-screen
             if (obs.x + obs.w < cam.x || obs.x > cam.x + viewW ||
                 obs.y + obs.h < cam.y || obs.y > cam.y + viewH) continue;
 
-            // Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.5)";
-            ctx.fillRect(obs.x + 10, obs.y + obs.h - 10, obs.w, 10);
+            const cx = obs.x + obs.w / 2;
 
-            // Body
-            ctx.fillStyle = obs.color;
-            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+            // Shadow underneath
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath();
+            ctx.ellipse(cx + 4, obs.y + obs.h + 2, obs.w * 0.5, obs.h * 0.15, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-            // Top highlight
-            ctx.fillStyle = "rgba(255,255,255,0.1)";
-            ctx.fillRect(obs.x, obs.y, obs.w, 4);
+            // Main rock body (dark brown base)
+            ctx.fillStyle = '#4a3728';
+            ctx.beginPath();
+            ctx.moveTo(obs.x + obs.w * 0.1, obs.y + obs.h * 0.7);
+            ctx.lineTo(obs.x + obs.w * 0.05, obs.y + obs.h * 0.4);
+            ctx.lineTo(obs.x + obs.w * 0.2, obs.y + obs.h * 0.15);
+            ctx.lineTo(obs.x + obs.w * 0.5, obs.y);
+            ctx.lineTo(obs.x + obs.w * 0.8, obs.y + obs.h * 0.1);
+            ctx.lineTo(obs.x + obs.w * 0.95, obs.y + obs.h * 0.35);
+            ctx.lineTo(obs.x + obs.w, obs.y + obs.h * 0.65);
+            ctx.lineTo(obs.x + obs.w * 0.85, obs.y + obs.h * 0.9);
+            ctx.lineTo(obs.x + obs.w * 0.6, obs.y + obs.h);
+            ctx.lineTo(obs.x + obs.w * 0.3, obs.y + obs.h * 0.95);
+            ctx.closePath();
+            ctx.fill();
 
-            // Side shadow
-            ctx.fillStyle = "rgba(0,0,0,0.2)";
-            ctx.fillRect(obs.x + obs.w - 4, obs.y, 4, obs.h);
+            // Mid layer (medium brown)
+            ctx.fillStyle = '#6b5344';
+            ctx.beginPath();
+            ctx.moveTo(obs.x + obs.w * 0.15, obs.y + obs.h * 0.65);
+            ctx.lineTo(obs.x + obs.w * 0.12, obs.y + obs.h * 0.4);
+            ctx.lineTo(obs.x + obs.w * 0.25, obs.y + obs.h * 0.2);
+            ctx.lineTo(obs.x + obs.w * 0.5, obs.y + obs.h * 0.08);
+            ctx.lineTo(obs.x + obs.w * 0.75, obs.y + obs.h * 0.15);
+            ctx.lineTo(obs.x + obs.w * 0.88, obs.y + obs.h * 0.38);
+            ctx.lineTo(obs.x + obs.w * 0.9, obs.y + obs.h * 0.6);
+            ctx.lineTo(obs.x + obs.w * 0.75, obs.y + obs.h * 0.82);
+            ctx.lineTo(obs.x + obs.w * 0.5, obs.y + obs.h * 0.88);
+            ctx.lineTo(obs.x + obs.w * 0.28, obs.y + obs.h * 0.8);
+            ctx.closePath();
+            ctx.fill();
+
+            // Top highlight (lighter brown)
+            ctx.fillStyle = '#8c7355';
+            ctx.beginPath();
+            ctx.moveTo(obs.x + obs.w * 0.25, obs.y + obs.h * 0.45);
+            ctx.lineTo(obs.x + obs.w * 0.3, obs.y + obs.h * 0.28);
+            ctx.lineTo(obs.x + obs.w * 0.5, obs.y + obs.h * 0.18);
+            ctx.lineTo(obs.x + obs.w * 0.7, obs.y + obs.h * 0.25);
+            ctx.lineTo(obs.x + obs.w * 0.75, obs.y + obs.h * 0.42);
+            ctx.lineTo(obs.x + obs.w * 0.6, obs.y + obs.h * 0.55);
+            ctx.lineTo(obs.x + obs.w * 0.4, obs.y + obs.h * 0.52);
+            ctx.closePath();
+            ctx.fill();
+
+            // Specular highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(obs.x + obs.w * 0.4, obs.y + obs.h * 0.3, obs.w * 0.12, obs.h * 0.08, -0.3, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        // Draw Items - Optimized: simple circle glow instead of radial gradient
-        const time = Date.now() / 500;
+        // Draw Items - 50% smaller, using cached colors
+        const time = performance.now() / 500; // Use performance.now() for better precision
         for (let i = 0; i < items.current.length; i++) {
             const item = items.current[i];
             if (item.collected) continue;
@@ -355,21 +417,20 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             if (item.pos.x < cam.x - 100 || item.pos.x > cam.x + viewW + 100 ||
                 item.pos.y < cam.y - 100 || item.pos.y > cam.y + viewH + 100) continue;
 
-            const bob = Math.sin(time + item.floatOffset) * 10;
+            const bob = Math.sin(time + item.floatOffset) * 8;
             const itemY = item.pos.y + bob;
-            const rarity = getRarity(item.slug);
 
-            // Simple glow circle (faster than radial gradient per frame)
+            // Simple glow circle (using cached color)
             ctx.globalAlpha = 0.3;
-            ctx.fillStyle = rarity.hex;
+            ctx.fillStyle = item.color;
             ctx.beginPath();
-            ctx.arc(item.pos.x, itemY, 45, 0, Math.PI * 2);
+            ctx.arc(item.pos.x, itemY, 25, 0, Math.PI * 2); // Smaller glow
             ctx.fill();
             ctx.globalAlpha = 1.0;
 
-            // Diamond
-            ctx.fillStyle = rarity.hex;
-            const S = SCALE * 0.8;
+            // Diamond (50% smaller)
+            ctx.fillStyle = item.color;
+            const S = SCALE * 0.4; // Was 0.8, now 0.4 (50% smaller)
             ctx.beginPath();
             ctx.moveTo(item.pos.x, itemY - (15 * S));
             ctx.lineTo(item.pos.x + (12 * S), itemY);
@@ -498,20 +559,20 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             <div className="absolute bottom-10 left-10 md:hidden grid grid-cols-3 gap-2 opacity-80 z-10">
                 <div />
                 <button
-                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-indigo-500 text-white text-2xl"
+                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-amber-500 text-white text-2xl"
                     onTouchStart={() => handleTouchMove(0, -1)} onTouchEnd={handleTouchEnd}
                 >▲</button>
                 <div />
                 <button
-                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-indigo-500 text-white text-2xl"
+                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-amber-500 text-white text-2xl"
                     onTouchStart={() => handleTouchMove(-1, 0)} onTouchEnd={handleTouchEnd}
                 >◀</button>
                 <button
-                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-indigo-500 text-white text-2xl"
+                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-amber-500 text-white text-2xl"
                     onTouchStart={() => handleTouchMove(0, 1)} onTouchEnd={handleTouchEnd}
                 >▼</button>
                 <button
-                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-indigo-500 text-white text-2xl"
+                    className="w-16 h-16 bg-slate-800/80 rounded-full border border-slate-600 active:bg-amber-500 text-white text-2xl"
                     onTouchStart={() => handleTouchMove(1, 0)} onTouchEnd={handleTouchEnd}
                 >▶</button>
             </div>
@@ -521,3 +582,4 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
         </div>
     );
 }
+

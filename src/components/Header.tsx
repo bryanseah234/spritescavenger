@@ -41,7 +41,7 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
                     />
                     <div className="hidden lg:block text-left">
                         <h1 className="font-bold text-slate-100 leading-tight tracking-tight flex items-center gap-2">
-                            SPRITE<span className="text-indigo-500">SCAVENGER</span>
+                            SPRITE<span className="text-amber-500">SCAVENGER</span>
                             <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
                         </h1>
                     </div>
@@ -60,7 +60,7 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
                                 className={`
                                     px-4 py-3 text-left text-xs font-bold uppercase tracking-wider transition-colors
                                     ${activeTab === tab
-                                        ? 'bg-indigo-600/10 text-indigo-400 border-l-2 border-indigo-500'
+                                        ? 'bg-amber-600/10 text-amber-400 border-l-2 border-amber-500'
                                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                                     }
                                 `}
@@ -72,16 +72,15 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
                 )}
             </div>
 
-            {/* Center: Search Bar */}
-            {/* Center: Search Bar */}
-            <div className="flex-1 max-w-md mx-4 md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:mx-0 md:w-full">
+            {/* Center: Search Bar - Responsive */}
+            <div className="flex-1 max-w-md min-w-0 mx-2 sm:mx-4 md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:mx-0 md:w-full md:max-w-sm lg:max-w-md">
                 <button
                     onClick={onOpenPalette}
-                    className="w-full bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-full h-10 px-4 flex items-center gap-3 group transition-colors"
+                    className="w-full bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-full h-10 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 group transition-colors"
                 >
-                    <Search className="w-4 h-4 text-slate-500 group-hover:text-indigo-400" />
-                    <span className="text-sm text-slate-500 font-medium">Search...</span>
-                    <span className="ml-auto text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-1.5 py-0.5 group-hover:border-slate-700">CMD+K</span>
+                    <Search className="w-4 h-4 text-slate-500 group-hover:text-amber-400 flex-shrink-0" />
+                    <span className="text-sm text-slate-500 font-medium truncate">Search...</span>
+                    <span className="hidden sm:inline ml-auto text-[10px] font-mono text-slate-600 border border-slate-800 rounded px-1.5 py-0.5 group-hover:border-slate-700 flex-shrink-0">CMD+K</span>
                 </button>
             </div>
 
@@ -96,14 +95,14 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
                     </div>
                     <div className="w-px h-6 bg-slate-800" />
                     <div className="flex flex-col items-end">
-                        <span className="text-xs font-bold text-indigo-400">{bits}</span>
+                        <span className="text-xs font-bold text-amber-400">{bits}</span>
                         <span className="text-[10px] text-slate-500 font-bold uppercase">Bits</span>
                     </div>
                     <div className="w-px h-6 bg-slate-800" />
                     <div className="flex flex-col items-end">
                         <span className="text-xs font-bold text-slate-200">Lvl.{level}</span>
                         <div className="w-16 h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
-                            <div className="h-full bg-indigo-500" style={{ width: `${progress}%` }} />
+                            <div className="h-full bg-amber-500" style={{ width: `${progress}%` }} />
                         </div>
                     </div>
                 </div>
@@ -112,7 +111,7 @@ export default function Header({ onSettingsClick, onOpenPalette, activeTab }: He
 
                 <button
                     onClick={() => onSettingsClick('settings')}
-                    className={`p-2 rounded-full transition-colors ${activeTab === 'settings' ? 'text-indigo-400 bg-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+                    className={`p-2 rounded-full transition-colors ${activeTab === 'settings' ? 'text-amber-400 bg-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
                 >
                     <Settings className="w-5 h-5" />
                 </button>

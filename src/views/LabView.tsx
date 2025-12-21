@@ -31,7 +31,7 @@ export default function LabView() {
             {/* Biome Section */}
             <section className="w-full">
                 <div className="flex items-center gap-2 mb-4 px-2">
-                    <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                    <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400">
                         <Cpu className="w-5 h-5" />
                     </div>
                     <div>
@@ -45,7 +45,7 @@ export default function LabView() {
             {/* Hardware Section */}
             <section className="w-full">
                 <div className="flex items-center gap-2 mb-4 px-2">
-                    <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                    <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400">
                         <Zap className="w-5 h-5" />
                     </div>
                     <div>
@@ -62,13 +62,13 @@ export default function LabView() {
                         const canAfford = bits >= cost;
 
                         return (
-                            <div key={type} className="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between gap-4 group hover:border-indigo-500/30 transition-all">
+                            <div key={type} className="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between gap-4 group hover:border-amber-500/30 transition-all">
                                 <div className="flex items-start gap-3">
-                                    <div className="shrink-0 w-12 h-12 bg-[#222522] rounded-lg flex items-center justify-center text-slate-500 group-hover:text-indigo-400 transition-colors">
+                                    <div className="shrink-0 w-12 h-12 bg-[#222522] rounded-lg flex items-center justify-center text-slate-500 group-hover:text-amber-400 transition-colors">
                                         <info.icon className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-slate-200">{info.name} <span className="text-xs text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded ml-1">LVL {level}</span></h3>
+                                        <h3 className="font-bold text-slate-200">{info.name} <span className="text-xs text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded ml-1">LVL {level}</span></h3>
                                         <p className="text-xs text-slate-500 mt-1">{info.description}</p>
                                     </div>
                                 </div>
@@ -79,7 +79,7 @@ export default function LabView() {
                                     className={`
                                         flex flex-col items-center justify-center w-full h-10 rounded font-mono text-xs font-bold transition-all
                                         ${canAfford
-                                            ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 active:translate-y-0.5'
+                                            ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/20 active:translate-y-0.5'
                                             : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                                         }
                                     `}
@@ -94,3 +94,4 @@ export default function LabView() {
         </div>
     );
 }
+

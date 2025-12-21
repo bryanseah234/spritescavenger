@@ -52,7 +52,7 @@ export default function Shop({ isOpen, onClose }: ShopProps) {
                         <div className="flex justify-between items-start mb-6">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-                                    <Cpu className="text-indigo-500" />
+                                    <Cpu className="text-amber-500" />
                                     Hardware Lab
                                 </h2>
                                 <p className="text-slate-400 text-sm">Upgrade system components using Bits.</p>
@@ -72,11 +72,11 @@ export default function Shop({ isOpen, onClose }: ShopProps) {
                                 return (
                                     <div key={type} className="bg-slate-800 p-4 rounded-lg flex items-center justify-between group hover:border-slate-600 border border-transparent transition-colors">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-slate-900 rounded flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition-colors">
+                                            <div className="w-10 h-10 bg-slate-900 rounded flex items-center justify-center text-slate-400 group-hover:text-amber-400 transition-colors">
                                                 <info.icon className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-slate-200">{info.name} <span className="text-xs text-indigo-400 ml-1">LVL {level}</span></h3>
+                                                <h3 className="font-bold text-slate-200">{info.name} <span className="text-xs text-amber-400 ml-1">LVL {level}</span></h3>
                                                 <p className="text-xs text-slate-500">{info.description}</p>
                                             </div>
                                         </div>
@@ -87,7 +87,7 @@ export default function Shop({ isOpen, onClose }: ShopProps) {
                                             className={`
                                     px-4 py-2 rounded font-mono text-sm font-bold transition-all
                                     ${canAfford
-                                                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 active:translate-y-0.5'
+                                                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 active:translate-y-0.5'
                                                     : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
                                                 }
                                 `}
@@ -109,3 +109,4 @@ export default function Shop({ isOpen, onClose }: ShopProps) {
         </AnimatePresence>
     );
 }
+

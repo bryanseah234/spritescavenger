@@ -50,7 +50,7 @@ export default function ExpeditionConsole({
                     {onToggleMode && (
                         <button
                             onClick={onToggleMode}
-                            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-mono text-indigo-400 rounded-md border border-slate-700 transition-colors uppercase tracking-wider"
+                            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-mono text-amber-400 rounded-md border border-slate-700 transition-colors uppercase tracking-wider"
                         >
                             {isAutoMode ? "Disable Auto-Hunt" : "Enable Auto-Hunt"}
                         </button>
@@ -59,7 +59,7 @@ export default function ExpeditionConsole({
                 {/* The original instructions block is moved here, assuming it's part of the new header structure */}
                 <div className="text-sm text-slate-400 space-y-1 border border-slate-800 bg-slate-900/50 p-6 rounded-xl">
                     <p>1. Start an Expedition to find data fragments.</p>
-                    <p>2. Finding <span className="text-indigo-400">duplicate</span> items earns you <span className="text-amber-400">Bits</span>.</p>
+                    <p>2. Finding <span className="text-amber-400">duplicate</span> items earns you <span className="text-amber-400">Bits</span>.</p>
                     <p>3. Use the <strong className="text-slate-200">Forge</strong> to recycle common items into upgrades.</p>
                     <p>4. Upgrade your hardware in the Lab to go deeper.</p>
                 </div>
@@ -106,3 +106,4 @@ export default function ExpeditionConsole({
         </div>
     );
 }
+

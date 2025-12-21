@@ -74,7 +74,7 @@ export default function ConfirmationModal({
                                     px-6 py-2 rounded-lg font-bold text-white shadow-lg transition-transform active:translate-y-0.5 flex items-center gap-2
                                     ${isDanger
                                         ? 'bg-red-600 hover:bg-red-500 shadow-red-900/30'
-                                        : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-900/30'
+                                        : 'bg-amber-600 hover:bg-amber-500 shadow-amber-900/30'
                                     }
                                 `}
                             >
@@ -88,3 +88,4 @@ export default function ConfirmationModal({
         </AnimatePresence>
     );
 }
+

@@ -69,7 +69,7 @@ export default function SettingsView() {
             {/* Header */}
             <div className="flex items-center gap-4 py-8 justify-center">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-700">
-                    <Save className="w-8 h-8 text-indigo-500" />
+                    <Save className="w-8 h-8 text-amber-500" />
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold text-slate-100">System</h1>
@@ -80,17 +80,17 @@ export default function SettingsView() {
 
                 {/* Profile Section */}
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 text-indigo-400 font-bold uppercase tracking-wider text-sm">
+                    <div className="flex items-center gap-2 text-amber-400 font-bold uppercase tracking-wider text-sm">
                         <User className="w-4 h-4" />
                         <span>Identity Module</span>
                     </div>
 
                     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                        <div className="absolute top-0 right-0 p-32 bg-amber-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
                         {/* ID Badge Preview */}
                         <div className="flex items-start gap-6 mb-8 relative z-10">
-                            <div className="w-24 h-24 bg-slate-800 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/20 overflow-hidden border border-slate-700">
+                            <div className="w-24 h-24 bg-slate-800 rounded-xl flex items-center justify-center shadow-lg shadow-amber-900/20 overflow-hidden border border-slate-700">
                                 {/* Use sprite image instead of initial */}
                                 {/* We crop to show the character. Sprite is 32x32 per frame typically, we want it big. */}
                                 <div className="relative w-16 h-16">
@@ -105,7 +105,7 @@ export default function SettingsView() {
                             <div className="flex-1 space-y-1">
                                 <div className="text-xs text-slate-500 font-mono mb-1">ID_CARD_V1.0</div>
                                 <div className="text-2xl font-bold text-white tracking-tight">{nameInput || "UNKNOWN"}</div>
-                                <div className="inline-block px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-xs font-bold uppercase border border-indigo-500/30">
+                                <div className="inline-block px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs font-bold uppercase border border-amber-500/30">
                                     {titleInput || "NO_DATA"}
                                 </div>
                                 <div className="pt-2 text-xs text-slate-500 flex gap-4">
@@ -126,7 +126,7 @@ export default function SettingsView() {
                                     value={nameInput}
                                     onChange={(e) => setNameInput(e.target.value)}
                                     maxLength={20}
-                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-amber-500 transition-colors"
                                     placeholder="Enter Name..."
                                 />
                             </div>
@@ -139,14 +139,14 @@ export default function SettingsView() {
                                     value={titleInput}
                                     onChange={(e) => setTitleInput(e.target.value)}
                                     maxLength={30}
-                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    className="w-full bg-[#222522] border border-slate-800 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-amber-500 transition-colors"
                                     placeholder="Enter Title..."
                                 />
                             </div>
 
                             <button
                                 onClick={handleSaveProfile}
-                                className="w-full bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white font-bold py-3 rounded-lg border border-slate-700 hover:border-indigo-500 transition-all flex items-center justify-center gap-2"
+                                className="w-full bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white font-bold py-3 rounded-lg border border-slate-700 hover:border-amber-500 transition-all flex items-center justify-center gap-2"
                             >
                                 <Save className="w-4 h-4" />
                                 UPDATE IDENTITY
@@ -193,7 +193,7 @@ export default function SettingsView() {
                                 value={importString}
                                 onChange={(e) => setImportString(e.target.value)}
                                 placeholder="Paste save string here..."
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-300 h-24 mb-4 focus:outline-none focus:border-indigo-500 resize-none"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-300 h-24 mb-4 focus:outline-none focus:border-amber-500 resize-none"
                             />
                             {importError && <p className="text-xs text-red-400 mb-2 text-center font-bold">INVALID DATA CORE STRING</p>}
                             <button
@@ -203,7 +203,7 @@ export default function SettingsView() {
                                     w-full py-3 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all
                                     ${importSuccess
                                         ? 'bg-emerald-600 text-white'
-                                        : 'bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white'
+                                        : 'bg-slate-800 hover:bg-amber-600 text-slate-300 hover:text-white'
                                     }
                                     ${!importString ? 'opacity-50 cursor-not-allowed hover:bg-slate-800 hover:text-slate-300' : ''}
                                 `}
@@ -241,3 +241,4 @@ export default function SettingsView() {
         </div >
     );
 }
+

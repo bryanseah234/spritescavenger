@@ -98,35 +98,35 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-2 flex justify-around z-50 pb-safe">
                 <button
                     onClick={() => router.push('/map')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'map' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'map' ? 'text-amber-400' : 'text-slate-500'}`}
                 >
                     <Map className="w-5 h-5 mb-1" />
                     <span className="text-[9px] font-bold">MAP</span>
                 </button>
                 <button
                     onClick={() => router.push('/lab')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'lab' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'lab' ? 'text-amber-400' : 'text-slate-500'}`}
                 >
                     <Cpu className="w-5 h-5 mb-1" />
                     <span className="text-[9px] font-bold">LAB</span>
                 </button>
                 <button
                     onClick={() => router.push('/forge')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'forge' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'forge' ? 'text-amber-400' : 'text-slate-500'}`}
                 >
                     <Hammer className="w-5 h-5 mb-1" />
                     <span className="text-[9px] font-bold">FORGE</span>
                 </button>
                 <button
                     onClick={() => router.push('/database')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'database' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'database' ? 'text-amber-400' : 'text-slate-500'}`}
                 >
                     <Database className="w-5 h-5 mb-1" />
                     <span className="text-[9px] font-bold">DB</span>
                 </button>
                 <button
                     onClick={() => router.push('/settings')}
-                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'settings' ? 'text-indigo-400' : 'text-slate-500'}`}
+                    className={`flex flex-col items-center p-2 rounded w-16 ${currentTab === 'settings' ? 'text-amber-400' : 'text-slate-500'}`}
                 >
                     <Settings className="w-5 h-5 mb-1" />
                     <span className="text-[9px] font-bold">SYS</span>

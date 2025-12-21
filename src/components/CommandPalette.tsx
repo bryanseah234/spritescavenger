@@ -139,11 +139,11 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
                                 onClick={() => handleSelect(item)}
                                 className={`
                                     w-full text-left px-3 py-2 rounded flex items-center justify-between group
-                                    ${index === selectedIndex ? 'bg-indigo-600/20 text-indigo-300' : 'text-slate-400 hover:bg-slate-800/50'}
+                                    ${index === selectedIndex ? 'bg-amber-600/20 text-amber-300' : 'text-slate-400 hover:bg-slate-800/50'}
                                 `}
                             >
                                 <div className="flex items-center gap-3">
-                                    <item.icon className={`w-4 h-4 ${index === selectedIndex ? 'text-indigo-400' : 'text-slate-600'}`} />
+                                    <item.icon className={`w-4 h-4 ${index === selectedIndex ? 'text-amber-400' : 'text-slate-600'}`} />
                                     <span className={`text-sm ${item.type === 'ITEM' && 'font-mono'}`}>
                                         {item.label}
                                     </span>
@@ -175,3 +175,4 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
         </div>
     );
 }
+

@@ -68,13 +68,13 @@ export default function CollectionGrid() {
                         className={`
                             px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all border flex flex-col items-center justify-center gap-1
                             ${activeCategory === cat
-                                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/50'
+                                ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-900/50'
                                 : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-200 hover:border-slate-600'
                             }
                         `}
                     >
                         <span>{cat}</span>
-                        <span className={`text-[10px] ${activeCategory === cat ? 'text-indigo-200' : 'text-slate-600'}`}>
+                        <span className={`text-[10px] ${activeCategory === cat ? 'text-amber-200' : 'text-slate-600'}`}>
                             ({getCategoryCount(cat).owned}/{getCategoryCount(cat).total})
                         </span>
                     </button>
@@ -152,3 +152,4 @@ export default function CollectionGrid() {
         </div>
     );
 }
+
