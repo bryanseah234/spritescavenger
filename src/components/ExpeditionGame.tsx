@@ -30,6 +30,17 @@ interface Obstacle {
     color: string;
 }
 
+interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    maxLife: number;
+    color: string;
+    size: number;
+}
+
 export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGameProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +89,11 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
     const playerSprite = useRef<HTMLCanvasElement | null>(null);
     // Remove raw map image ref, strictly use pattern
     const mapPattern = useRef<CanvasPattern | null>(null);
+
+    // Animation state
+    const isWalking = useRef(false);
+    const walkTime = useRef(0);
+    const particles = useRef<Particle[]>([]);
 
     // Helper: Chroma Key
     const processSprite = (img: HTMLImageElement): HTMLCanvasElement => {
@@ -255,6 +271,13 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             dy *= 0.707;
         }
 
+        // Track walking state for animation
+        const moving = dx !== 0 || dy !== 0;
+        isWalking.current = moving;
+        if (moving) {
+            walkTime.current += 0.15; // Animation speed
+        }
+
         // Facing Direction (Flip)
         if (dx > 0) facing.current = 1;
         if (dx < 0) facing.current = -1;
@@ -300,8 +323,31 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             const dist = Math.hypot(playerPos.current.x - item.pos.x, playerPos.current.y - item.pos.y);
             if (dist < TOUCH_DIST) {
                 item.collected = true;
-                // Score removed (unused)
+                // Spawn collection particles!
+                for (let i = 0; i < 12; i++) {
+                    const angle = (Math.PI * 2 / 12) * i + Math.random() * 0.3;
+                    const speed = 3 + Math.random() * 4;
+                    particles.current.push({
+                        x: item.pos.x,
+                        y: item.pos.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 2,
+                        life: 1,
+                        maxLife: 1,
+                        color: item.color,
+                        size: 4 + Math.random() * 4
+                    });
+                }
             }
+        });
+
+        // Update particles
+        particles.current = particles.current.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.15; // Gravity
+            p.life -= 0.025;
+            return p.life > 0;
         });
 
         if (collectedCount === 5) {
@@ -440,17 +486,37 @@ export default function ExpeditionGame({ onComplete, biomeId }: ExpeditionGamePr
             ctx.fill();
         }
 
-        // Draw Player
-        ctx.save();
-        ctx.translate(playerPos.current.x, playerPos.current.y);
+        // Draw Particles (before player so they appear behind/around)
+        for (const p of particles.current) {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
 
-        // Shadow
+        // Draw Player with walking animation
+        ctx.save();
+
+        // Calculate walking animation values
+        const walkBob = isWalking.current ? Math.sin(walkTime.current * 2) * 3 : 0;
+        const walkSquash = isWalking.current ? 1 + Math.sin(walkTime.current * 4) * 0.05 : 1;
+        const walkStretch = isWalking.current ? 1 - Math.sin(walkTime.current * 4) * 0.05 : 1;
+        const walkTilt = isWalking.current ? Math.sin(walkTime.current * 2) * 0.08 : 0;
+
+        ctx.translate(playerPos.current.x, playerPos.current.y + walkBob);
+
+        // Shadow (slightly animated)
+        const shadowScale = isWalking.current ? 1 + Math.sin(walkTime.current * 4) * 0.1 : 1;
         ctx.beginPath();
-        ctx.ellipse(0, 12 * SCALE, 12 * SCALE, 6 * SCALE, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 12 * SCALE - walkBob, 12 * SCALE * shadowScale, 6 * SCALE, 0, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.5)";
         ctx.fill();
 
-        ctx.scale(facing.current, 1);
+        // Apply walking transformations
+        ctx.scale(facing.current * walkSquash, walkStretch);
+        ctx.rotate(walkTilt * facing.current);
 
         if (playerSprite.current) {
             ctx.drawImage(

@@ -92,15 +92,12 @@ export default function SettingsView() {
                         <div className="flex items-start gap-6 mb-8 relative z-10">
                             <div className="w-24 h-24 bg-slate-800 rounded-xl flex items-center justify-center shadow-lg shadow-amber-900/20 overflow-hidden border border-slate-700">
                                 {/* Use sprite image instead of initial */}
-                                {/* We crop to show the character. Sprite is 32x32 per frame typically, we want it big. */}
-                                <div className="relative w-16 h-16">
-                                    <img
-                                        src="/assets/player_sprite.png"
-                                        alt="Avatar"
-                                        className="w-full h-full object-cover rendering-pixelated scale-150 translate-y-2"
-                                        style={{ imageRendering: 'pixelated' }}
-                                    />
-                                </div>
+                                <img
+                                    src="/assets/player_sprite.png"
+                                    alt="Avatar"
+                                    className="w-20 h-20 object-contain"
+                                    style={{ imageRendering: 'pixelated' }}
+                                />
                             </div>
                             <div className="flex-1 space-y-1">
                                 <div className="text-xs text-slate-500 font-mono mb-1">ID_CARD_V1.0</div>
