@@ -88,7 +88,7 @@ export default function CollectionGrid() {
                         {sortMode === 'owned' ? 'Sorted by: Discovered' : 'Sorted by: Alphabetical'}
                     </span>
                     <span className="text-[10px] text-slate-600 font-mono">
-                        {activeCategory.toUpperCase()} // {sortedItems.length} ITEMS
+                        {activeCategory.toUpperCase()} - {sortedItems.length} ITEMS
                     </span>
                 </div>
 
@@ -119,7 +119,7 @@ export default function CollectionGrid() {
                                                 fill
                                                 className="object-contain pixelated rendering-pixelated"
                                                 sizes="100px"
-                                                onError={(e) => {
+                                                onError={() => {
                                                     // Fallback if image fails?
                                                     console.warn(`Failed to load icon: ${slug}`);
                                                 }}

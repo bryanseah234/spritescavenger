@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useGame } from "@/context/GameContext";
 import ExpeditionConsole from "@/components/ExpeditionConsole";
 import LootReveal from "@/components/LootReveal";
@@ -16,18 +16,24 @@ export default function ExpeditionView() {
     const [isAutoActive, setIsAutoActive] = useState(false);
     const AUTO_DURATION = 30;
 
+    const handleGameComplete = useCallback((earnedLoot: string[]) => {
+        addToInventory(earnedLoot);
+        setLoot(earnedLoot);
+        setGameState('REVEAL');
+    }, [addToInventory]);
+
     // Auto Mode Timer
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isAutoActive && autoTimeLeft > 0) {
-            interval = setInterval(() => {
+        if (!isAutoActive) return;
+
+        const timeout = setTimeout(() => {
+            if (autoTimeLeft > 0) {
                 setAutoTimeLeft((prev) => prev - 1);
-            }, 1000);
-        } else if (isAutoActive && autoTimeLeft === 0) {
-            // Auto finish
+                return;
+            }
+
             setIsAutoActive(false);
 
-            // Generate Real Loot
             const allSlugs = Object.values(masterCollection).flat() as string[];
             const earnedLoot: string[] = [];
             for (let i = 0; i < 3; i++) {
@@ -36,9 +42,12 @@ export default function ExpeditionView() {
             }
 
             handleGameComplete(earnedLoot);
-        }
-        return () => clearInterval(interval);
-    }, [isAutoActive, autoTimeLeft]);
+        }, autoTimeLeft > 0 ? 1000 : 0);
+
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, [handleGameComplete, isAutoActive, autoTimeLeft]);
 
     const handleStart = () => {
         if (isAutoMode) {
@@ -48,12 +57,6 @@ export default function ExpeditionView() {
         } else {
             setGameState('PLAYING');
         }
-    };
-
-    const handleGameComplete = (earnedLoot: string[]) => {
-        addToInventory(earnedLoot);
-        setLoot(earnedLoot);
-        setGameState('REVEAL');
     };
 
     const handleClaim = () => {
