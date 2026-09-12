@@ -112,3 +112,7 @@ npm run build
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+2026-09-12 maintenance in progress: confirmed production save recovery/export/reset and input-shortcut defects are being repaired in isolation. Existing game data and item assets must be preserved. Browser storage is currently local; this work does not establish a Supabase migration or monthly quota savings. Validation and production release are pending.
+
+2026-09-12 save recovery maintenance: unreadable saves are preserved with a raw download; current progress can be exported when writes or clipboard access fail. Imports validate before replacement and support Unicode plus older Latin-1 backups. Progress persists on changes, pending loot survives reload, other-tab conflicts pause stale writes, resets affect only the game key, and numeric shortcuts ignore typing. Local verification passes: 17 unit tests, TypeScript, targeted lint (one existing image warning), static production build and 16 desktop/mobile browser scenarios. The js-yaml development dependency is patched to 4.3.2; npm audit reports zero vulnerabilities. Build Check uses Node 24 and runs real tests/build on each main PR/update; Next no longer ignores type errors. Hosted and exact production verification are pending. Existing item assets and data are unchanged. Saves remain in browser storage; Supabase migration and measured monthly quota savings are not part of this repair.

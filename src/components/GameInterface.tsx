@@ -17,7 +17,7 @@ interface GameInterfaceProps {
 }
 
 export default function GameInterface({ currentTab }: GameInterfaceProps) {
-    const { isLoading } = useGame();
+    const { isLoading, saveError } = useGame();
     const router = useRouter();
 
     const [commandOpen, setCommandOpen] = useState(false);
@@ -42,6 +42,9 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
 
             // Ignore other shortcuts if inputs or modals are open
             if (commandOpen) return;
+            if (e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+            const target = e.target;
+            if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])'))) return;
 
             // Tab Switching
             if (e.key === '1') router.push('/map');
@@ -79,6 +82,7 @@ export default function GameInterface({ currentTab }: GameInterfaceProps) {
             />
 
             <div className="w-full">
+                {saveError && <p role="alert" className="mx-4 mt-4 rounded-lg border border-amber-500/50 bg-amber-950 p-4 text-sm text-amber-100">{saveError}</p>}
                 {currentTab === 'map' && <ExpeditionView />}
                 {currentTab === 'lab' && <LabView />}
                 {currentTab === 'forge' && <ForgeView />}
