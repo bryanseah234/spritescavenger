@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { downloadSaveFile, SAVE_KEY } from "@/utils/gameSave";
 
 interface Props {
     children?: ReactNode;
@@ -27,8 +28,23 @@ export default class ErrorBoundary extends Component<Props, State> {
     }
 
     private handleReset = () => {
-        localStorage.clear();
-        window.location.reload();
+        if (!window.confirm("Reset only Sprite Scavenger progress? Download your stored save first if you want to keep it.")) return;
+        try {
+            localStorage.removeItem(SAVE_KEY);
+            window.location.reload();
+        } catch {
+            window.alert("Browser storage is unavailable. Your stored save was not changed.");
+        }
+    };
+
+    private downloadStoredSave = () => {
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (raw !== null) downloadSaveFile(raw, "sprite-scavenger-stored-save.json");
+            else window.alert("No stored Sprite Scavenger save was found.");
+        } catch {
+            window.alert("Browser storage is unavailable. Your stored save was not changed.");
+        }
     };
 
     public render() {
@@ -44,6 +60,8 @@ export default class ErrorBoundary extends Component<Props, State> {
                             {this.state.error?.toString()}
                         </p>
                     </div>
+                    <button onClick={() => window.location.reload()} className="mb-4 rounded border border-slate-500 px-6 py-2 text-slate-100">Reload Without Resetting</button>
+                    <button onClick={this.downloadStoredSave} className="mb-4 rounded border border-slate-500 px-6 py-2 text-slate-100">Download Stored Save</button>
                     <button
                         onClick={this.handleReset}
                         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors"

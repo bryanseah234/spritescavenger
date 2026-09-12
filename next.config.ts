@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // Required for static export
   },
-  typescript: {
-    ignoreBuildErrors: true, // Speed up build
-  },
 };
 
 export default nextConfig;

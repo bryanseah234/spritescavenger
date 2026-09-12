@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGame } from "@/context/GameContext";
 import { Copy, Check, Upload, Save, AlertTriangle, User, Hash, Tag, Trash2 } from "lucide-react";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { defaultSave, downloadSaveFile, importSaveString } from "@/utils/gameSave";
 
 export default function SettingsView() {
     const {
@@ -11,7 +12,10 @@ export default function SettingsView() {
         exportSave,
         importSave,
         level,
-        xp
+        xp,
+        resetSave,
+        saveError,
+        recoverySave,
     } = useGame();
 
     const [nameInput, setNameInput] = useState(playerName);
@@ -20,9 +24,17 @@ export default function SettingsView() {
     // Save/Load States
     const [importString, setImportString] = useState("");
     const [copySuccess, setCopySuccess] = useState(false);
+    const [copyError, setCopyError] = useState(false);
+    const [backupString, setBackupString] = useState("");
     const [importError, setImportError] = useState(false);
     const [importSuccess, setImportSuccess] = useState(false);
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    useEffect(() => {
+        // Keep imported profile values visible without changing unsaved text on other game updates.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setNameInput(playerName);
+        setTitleInput(playerTitle);
+    }, [playerName, playerTitle]);
 
     // Profile Handling
     const handleSaveProfile = () => {
@@ -30,11 +42,17 @@ export default function SettingsView() {
     };
 
     // Export Handling
-    const handleCopy = () => {
+    const handleCopy = async () => {
         const saveString = exportSave();
-        navigator.clipboard.writeText(saveString);
-        setCopySuccess(true);
-        setTimeout(() => setCopySuccess(false), 2000);
+        setBackupString(saveString);
+        setCopySuccess(false);
+        setCopyError(false);
+        try {
+            await navigator.clipboard.writeText(saveString);
+            setCopySuccess(true);
+        } catch {
+            setCopyError(true);
+        }
     };
 
     // Import Handling
@@ -43,6 +61,9 @@ export default function SettingsView() {
         setImportSuccess(false);
         const success = importSave(importString);
         if (success) {
+            const imported = importSaveString(importString);
+            setNameInput(imported.playerName);
+            setTitleInput(imported.playerTitle);
             setImportSuccess(true);
             setTimeout(() => {
                 setImportSuccess(false);
@@ -59,8 +80,12 @@ export default function SettingsView() {
     };
 
     const confirmReset = () => {
-        localStorage.clear();
-        window.location.reload();
+        if (resetSave()) {
+            const fresh = defaultSave();
+            setNameInput(fresh.playerName);
+            setTitleInput(fresh.playerTitle);
+            setIsResetModalOpen(false);
+        }
     };
 
     return (
@@ -115,10 +140,11 @@ export default function SettingsView() {
                         {/* Inputs */}
                         <div className="space-y-4 relative z-10">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                                <label htmlFor="player-name" className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
                                     <Hash className="w-3 h-3" /> Callsign (Name)
                                 </label>
                                 <input
+                                    id="player-name"
                                     type="text"
                                     value={nameInput}
                                     onChange={(e) => setNameInput(e.target.value)}
@@ -128,10 +154,11 @@ export default function SettingsView() {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                                <label htmlFor="player-title" className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
                                     <Tag className="w-3 h-3" /> Designation (Title)
                                 </label>
                                 <input
+                                    id="player-title"
                                     type="text"
                                     value={titleInput}
                                     onChange={(e) => setTitleInput(e.target.value)}
@@ -164,7 +191,7 @@ export default function SettingsView() {
                         {/* Export */}
                         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
                             <h3 className="font-bold text-slate-200 mb-2">Backup Progress</h3>
-                            <p className="text-sm text-slate-500 mb-4">Generate a secure hash string of your current progress.</p>
+                            <p className="text-sm text-slate-400 mb-4">Copy or download a backup of your current progress. Keep it somewhere safe.</p>
                             <button
                                 onClick={handleCopy}
                                 className={`
@@ -177,6 +204,10 @@ export default function SettingsView() {
                             >
                                 {copySuccess ? <><Check className="w-4 h-4" /> Copied to Clipboard</> : <><Copy className="w-4 h-4" /> Copy Save String</>}
                             </button>
+                            {copyError && <p role="status" className="mt-3 text-sm text-amber-300">Clipboard access failed. Download the backup or copy the string below.</p>}
+                            {backupString && <label className="mt-3 block text-sm text-slate-300">Backup string<textarea readOnly value={backupString} className="mt-2 h-24 w-full rounded border border-slate-700 bg-slate-950 p-3 font-mono text-xs" /></label>}
+                            <button onClick={() => downloadSaveFile(exportSave(), "sprite-scavenger-backup.txt")} className="mt-3 w-full rounded-lg border border-slate-600 px-4 py-3 text-sm text-slate-200">Download Backup</button>
+                            {recoverySave !== null && <button onClick={() => downloadSaveFile(recoverySave, "sprite-scavenger-stored-save.json")} className="mt-3 w-full rounded-lg border border-amber-500 px-4 py-3 text-sm text-amber-200">Download Preserved Save</button>}
                         </div>
 
                         {/* Import */}
@@ -192,7 +223,7 @@ export default function SettingsView() {
                                 placeholder="Paste save string here..."
                                 className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-300 h-24 mb-4 focus:outline-none focus:border-amber-500 resize-none"
                             />
-                            {importError && <p className="text-xs text-red-400 mb-2 text-center font-bold">INVALID DATA CORE STRING</p>}
+                            {importError && <p role="status" className="text-xs text-red-400 mb-2 text-center font-bold">{saveError ? "RESTORE COULD NOT BE SAVED. CURRENT PROGRESS WAS NOT REPLACED." : "INVALID DATA CORE STRING. CURRENT PROGRESS WAS NOT REPLACED."}</p>}
                             <button
                                 onClick={handleImport}
                                 disabled={!importString}
@@ -229,7 +260,7 @@ export default function SettingsView() {
             <ConfirmationModal
                 isOpen={isResetModalOpen}
                 title="FACTORY RESET"
-                message="Are you sure you want to wipe all data? This action cannot be undone and your progress will be lost forever."
+                message="Reset only your Sprite Scavenger progress? Download a backup first if you want to keep it. Other browser data will be preserved."
                 confirmLabel="WIPE DATA"
                 onConfirm={confirmReset}
                 onCancel={() => setIsResetModalOpen(false)}
@@ -238,4 +269,3 @@ export default function SettingsView() {
         </div >
     );
 }
-
